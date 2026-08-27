@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mis pruebas — Sistema de Pruebas</title>
+  <link rel="stylesheet" href="/app/assets/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>Mis pruebas</h1>
+    <div class="user-info">
+      <span id="user-name"></span>
+      <button class="secondary small" id="logout-btn">Salir</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Pruebas disponibles</h2>
+      <table>
+        <thead><tr><th>Título</th><th>Preguntas</th><th>Tiempo máx.</th><th></th></tr></thead>
+        <tbody id="disponibles-body">
+          <tr><td colspan="4" class="muted">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Mi historial</h2>
+      <table>
+        <thead><tr><th>Prueba</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="historial-body">
+          <tr><td colspan="3" class="muted">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js"></script>
+  <script src="/app/assets/js/estudiante-dashboard.js"></script>
+</body>
+</html>

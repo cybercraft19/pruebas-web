@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel del evaluador — Sistema de Pruebas</title>
+  <link rel="stylesheet" href="/app/assets/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>Panel del evaluador</h1>
+    <div class="user-info">
+      <span id="user-name"></span>
+      <button class="secondary small" id="logout-btn">Salir</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Subir una prueba nueva</h2>
+      <p class="muted">
+        1) Descarga la plantilla Excel. 2) Complétala con las preguntas, categorías y pesos.
+        3) Súbela aquí (opcionalmente junto al PDF original de referencia).
+      </p>
+      <button class="secondary" id="descargar-plantilla">Descargar plantilla Excel</button>
+
+      <form id="import-form" style="margin-top: 20px">
+        <label for="archivo">Archivo Excel (.xlsx)</label>
+        <input type="file" id="archivo" accept=".xlsx,.xls" required />
+
+        <label for="pdf_referencia">PDF de referencia (opcional)</label>
+        <input type="file" id="pdf_referencia" accept="application/pdf" />
+
+        <button type="submit">Importar prueba</button>
+        <div class="error" id="import-error"></div>
+        <div class="success" id="import-success"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="flex-between">
+        <h2>Mis pruebas</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Estado</th>
+            <th>Preguntas</th>
+            <th>Categorías</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="pruebas-body">
+          <tr><td colspan="5" class="muted">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Estudiantes</h2>
+      <form id="estudiante-form" class="flex-between" style="align-items: flex-end">
+        <div style="flex: 1">
+          <label for="est-name">Nombre</label>
+          <input type="text" id="est-name" required />
+        </div>
+        <div style="flex: 1">
+          <label for="est-email">Correo</label>
+          <input type="email" id="est-email" required />
+        </div>
+        <div style="flex: 1">
+          <label for="est-password">Contraseña</label>
+          <input type="password" id="est-password" required minlength="8" />
+        </div>
+        <button type="submit">Crear</button>
+      </form>
+      <div class="error" id="estudiante-error"></div>
+      <table style="margin-top: 16px">
+        <thead>
+          <tr><th>Nombre</th><th>Correo</th></tr>
+        </thead>
+        <tbody id="estudiantes-body">
+          <tr><td colspan="2" class="muted">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js"></script>
+  <script src="/app/assets/js/evaluador-dashboard.js"></script>
+</body>
+</html>

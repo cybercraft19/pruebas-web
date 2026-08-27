@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presentar prueba — Sistema de Pruebas</title>
+  <link rel="stylesheet" href="/app/assets/css/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1 id="titulo">Prueba</h1>
+    <div class="user-info">
+      <a class="link" href="/app/estudiante/index.html" style="color:#fff">← Volver</a>
+      <button class="secondary small" id="logout-btn">Salir</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card" id="instrucciones-card">
+      <p id="instrucciones" class="muted"></p>
+    </div>
+
+    <div class="card" id="preguntas-card" style="display:none">
+      <div id="preguntas-body"></div>
+      <div class="flex-between">
+        <span class="muted" id="progreso"></span>
+        <button id="finalizar-btn">Finalizar y calificar</button>
+      </div>
+      <div class="error" id="finalizar-error"></div>
+    </div>
+
+    <div class="card" id="resultados-card" style="display:none">
+      <h2>Resultado</h2>
+      <table>
+        <thead><tr><th>Categoría</th><th>Puntaje</th><th>Interpretación</th></tr></thead>
+        <tbody id="resultados-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js"></script>
+  <script src="/app/assets/js/estudiante-prueba.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detalle de la prueba — Sistema de Pruebas</title>
+  <link rel="stylesheet" href="/app/assets/css/style.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+</head>
+<body>
+  <div class="topbar">
+    <h1>Detalle de la prueba</h1>
+    <div class="user-info">
+      <a class="link" href="/app/evaluador/index.html" style="color:#fff">← Volver</a>
+      <button class="secondary small" id="logout-btn">Salir</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="flex-between">
+        <div>
+          <h2 id="titulo"></h2>
+          <span class="badge" id="estado-badge"></span>
+        </div>
+        <button id="publicar-btn">Publicar prueba</button>
+      </div>
+      <p id="instrucciones" class="muted"></p>
+    </div>
+
+    <div class="card">
+      <h2>Categorías y tipo de puntuación</h2>
+      <table>
+        <thead><tr><th>Categoría</th><th>Tipo de puntuación</th></tr></thead>
+        <tbody id="categorias-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Preguntas</h2>
+      <div id="preguntas-body"></div>
+    </div>
+
+    <div class="card">
+      <h2>Resultados de estudiantes</h2>
+      <table id="resultados-table" class="display" style="width:100%">
+        <thead>
+          <tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Finalizado</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="/app/assets/js/evaluador-prueba.js"></script>
+</body>
+</html>
