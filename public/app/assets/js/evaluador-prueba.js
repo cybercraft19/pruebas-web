@@ -26,6 +26,79 @@
     Api.download(`/api/pruebas/${pruebaId}/resultados/exportar`, `prueba-${pruebaId}-resultados.xlsx`);
   });
 
+  const headerView = document.getElementById('prueba-header-view');
+  const editarForm = document.getElementById('editar-form');
+  const editarBtn = document.getElementById('editar-btn');
+  editarBtn.innerHTML = `${Icons.plus} Editar`;
+  document.getElementById('guardar-editar-btn').innerHTML = `${Icons.checkCircle} Guardar cambios`;
+
+  editarBtn.addEventListener('click', () => {
+    headerView.style.display = 'none';
+    editarForm.style.display = 'block';
+  });
+
+  document.getElementById('cancelar-editar-btn').addEventListener('click', () => {
+    editarForm.style.display = 'none';
+    headerView.style.display = 'flex';
+  });
+
+  editarForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('editar-error');
+    const guardarBtn = document.getElementById('guardar-editar-btn');
+    errorBox.textContent = '';
+    guardarBtn.disabled = true;
+
+    try {
+      await Api.put(`/api/pruebas/${pruebaId}`, {
+        titulo: document.getElementById('editar-titulo').value,
+        instrucciones: document.getElementById('editar-instrucciones').value || null,
+      });
+      editarForm.style.display = 'none';
+      headerView.style.display = 'flex';
+      cargar();
+    } catch (err) {
+      errorBox.textContent = formatError(err);
+    } finally {
+      guardarBtn.disabled = false;
+    }
+  });
+
+  initDropzone('reimportar-archivo', Icons.fileText);
+
+  const reimportarForm = document.getElementById('reimportar-form');
+  document.getElementById('reimportar-submit').innerHTML = `${Icons.plus} Reemplazar contenido`;
+
+  reimportarForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('reimportar-error');
+    const successBox = document.getElementById('reimportar-success');
+    const submitBtn = document.getElementById('reimportar-submit');
+    errorBox.textContent = '';
+    successBox.textContent = '';
+
+    const formData = new FormData();
+    formData.append('archivo', document.getElementById('reimportar-archivo').files[0]);
+
+    submitBtn.disabled = true;
+    try {
+      await Api.postForm(`/api/pruebas/${pruebaId}/reimportar`, formData);
+      successBox.textContent = 'Contenido reemplazado correctamente.';
+      reimportarForm.reset();
+      resetDropzone('reimportar-archivo');
+      cargar();
+    } catch (err) {
+      errorBox.textContent = formatError(err);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  document.getElementById('publicar-btn').addEventListener('click', async () => {
+    await Api.post(`/api/pruebas/${pruebaId}/publicar`);
+    cargar();
+  });
+
   let tipoPrueba = 'cuestionario';
 
   async function cargar() {
@@ -34,6 +107,11 @@
 
     document.getElementById('titulo').textContent = prueba.titulo;
     document.getElementById('instrucciones').textContent = prueba.instrucciones || '';
+    document.getElementById('editar-titulo').value = prueba.titulo;
+    document.getElementById('editar-instrucciones').value = prueba.instrucciones || '';
+
+    document.getElementById('reemplazar-card').style.display =
+      tipoPrueba === 'cuestionario' && prueba.estado === 'borrador' ? 'block' : 'none';
 
     const badge = document.getElementById('estado-badge');
     badge.textContent = prueba.estado;
@@ -45,11 +123,8 @@
       publicarBtn.disabled = true;
     } else {
       publicarBtn.innerHTML = `${Icons.play} Publicar prueba`;
+      publicarBtn.disabled = false;
     }
-    publicarBtn.addEventListener('click', async () => {
-      await Api.post(`/api/pruebas/${pruebaId}/publicar`);
-      cargar();
-    });
 
     if (tipoPrueba === 'tmt') {
       document.getElementById('categorias-card').style.display = 'none';
@@ -134,7 +209,7 @@
       });
     } else {
       document.getElementById('resultados-head').innerHTML =
-        '<tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Finalizado</th></tr>';
+        '<tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Recomendación</th><th>Finalizado</th></tr>';
 
       resultados.forEach((intento) => {
         intento.resultados.forEach((r) => {
@@ -144,6 +219,7 @@
             esc(r.categoria),
             r.puntaje,
             esc(r.etiqueta || '—'),
+            esc(r.recomendacion || '—'),
             new Date(intento.finalizado_at).toLocaleString(),
           ]);
         });

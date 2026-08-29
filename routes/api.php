@@ -3,10 +3,13 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EstudianteController;
 use App\Http\Controllers\Api\IntentoController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PruebaController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -20,12 +23,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/estudiantes', [EstudianteController::class, 'store']);
         Route::get('/estudiantes/exportar', [EstudianteController::class, 'exportar']);
         Route::delete('/estudiantes/{estudiante}', [EstudianteController::class, 'destroy']);
+        Route::post('/estudiantes/{estudiante}/reset-password', [EstudianteController::class, 'resetPassword']);
 
         Route::get('/pruebas/plantilla', [PruebaController::class, 'plantilla']);
         Route::post('/pruebas/importar', [PruebaController::class, 'importar']);
         Route::post('/pruebas/tmt', [PruebaController::class, 'crearTmt']);
         Route::get('/pruebas', [PruebaController::class, 'index']);
         Route::get('/pruebas/{prueba}', [PruebaController::class, 'show']);
+        Route::put('/pruebas/{prueba}', [PruebaController::class, 'update']);
+        Route::post('/pruebas/{prueba}/reimportar', [PruebaController::class, 'reimportar']);
         Route::post('/pruebas/{prueba}/publicar', [PruebaController::class, 'publicar']);
         Route::post('/pruebas/{prueba}/archivar', [PruebaController::class, 'archivar']);
         Route::get('/pruebas/{prueba}/resultados', [PruebaController::class, 'resultados']);

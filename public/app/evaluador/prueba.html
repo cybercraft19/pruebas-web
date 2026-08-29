@@ -69,7 +69,7 @@
       <div class="main__content">
         <div class="container">
           <div class="card">
-            <div class="flex-between">
+            <div class="flex-between" id="prueba-header-view">
               <div>
                 <div class="flex-between" style="justify-content: flex-start; gap: 12px">
                   <h1 id="titulo" style="font-size:1.3rem">Prueba</h1>
@@ -77,8 +77,48 @@
                 </div>
                 <p id="instrucciones" class="muted" style="margin-top:8px"></p>
               </div>
-              <button id="publicar-btn"></button>
+              <div style="display:flex;gap:8px;flex-shrink:0">
+                <button type="button" class="secondary" id="editar-btn"></button>
+                <button id="publicar-btn"></button>
+              </div>
             </div>
+
+            <form id="editar-form" style="display:none">
+              <label for="editar-titulo">Título</label>
+              <input type="text" id="editar-titulo" required maxlength="255" />
+
+              <label for="editar-instrucciones">Instrucciones</label>
+              <textarea id="editar-instrucciones" rows="2"></textarea>
+
+              <div class="flex-between" style="margin-top:14px">
+                <button type="button" class="secondary" id="cancelar-editar-btn">Cancelar</button>
+                <button type="submit" id="guardar-editar-btn"></button>
+              </div>
+              <div class="error" id="editar-error"></div>
+            </form>
+          </div>
+
+          <div class="card" id="reemplazar-card" style="display:none">
+            <div class="section-title">Reemplazar contenido</div>
+            <p class="section-subtitle">
+              Subí un nuevo Excel para reemplazar por completo las categorías, preguntas y opciones de esta
+              prueba. Solo disponible mientras esté en borrador y sin intentos de estudiantes.
+            </p>
+            <form id="reimportar-form">
+              <label for="reimportar-archivo">Archivo Excel (.xlsx)</label>
+              <label class="dropzone" for="reimportar-archivo" id="dropzone-reimportar-archivo">
+                <input type="file" id="reimportar-archivo" accept=".xlsx,.xls" required />
+                <div class="dropzone__icon" id="dropzone-reimportar-archivo-icon"></div>
+                <div class="dropzone__text">
+                  <strong>Hacé clic o arrastrá el archivo aquí</strong>
+                  <span>.xlsx o .xls</span>
+                </div>
+                <div class="dropzone__filename" id="dropzone-reimportar-archivo-filename"></div>
+              </label>
+              <button type="submit" id="reimportar-submit"></button>
+              <div class="error" id="reimportar-error"></div>
+              <div class="success" id="reimportar-success"></div>
+            </form>
           </div>
 
           <div class="card" id="categorias-card">

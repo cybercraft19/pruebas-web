@@ -49,6 +49,7 @@ const Api = (() => {
   return {
     get: (url) => request(url),
     post: (url, body) => request(url, { method: 'POST', body: body instanceof FormData ? body : JSON.stringify(body || {}) }),
+    put: (url, body) => request(url, { method: 'PUT', body: JSON.stringify(body || {}) }),
     delete: (url) => request(url, { method: 'DELETE' }),
     postForm: (url, formData) => request(url, { method: 'POST', body: formData }),
     download: async (url, filename) => {
@@ -118,6 +119,7 @@ const Icons = {
   tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L3 3v6.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.82 0l4.6-4.6a2 2 0 0 0 0-2.82z"/><line x1="7.5" y1="7.5" x2="7.51" y2="7.5"/></svg>',
   award: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>',
 };
 
 function lanzarConfeti(host, cantidad = 26) {
@@ -136,6 +138,51 @@ function lanzarConfeti(host, cantidad = 26) {
     host.appendChild(pieza);
     setTimeout(() => pieza.remove(), duracion + retraso + 50);
   }
+}
+
+function initDropzone(inputId, iconoSvg) {
+  const input = document.getElementById(inputId);
+  const zone = document.getElementById(`dropzone-${inputId}`);
+  const icono = document.getElementById(`dropzone-${inputId}-icon`);
+  const nombre = document.getElementById(`dropzone-${inputId}-filename`);
+  if (!input || !zone) return;
+
+  icono.innerHTML = iconoSvg;
+
+  function actualizar() {
+    const archivo = input.files[0];
+    zone.classList.toggle('has-file', !!archivo);
+    nombre.textContent = archivo ? archivo.name : '';
+  }
+
+  input.addEventListener('change', actualizar);
+
+  ['dragenter', 'dragover'].forEach((evento) => {
+    zone.addEventListener(evento, (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach((evento) => {
+    zone.addEventListener(evento, (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+    });
+  });
+
+  zone.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      actualizar();
+    }
+  });
+}
+
+function resetDropzone(inputId) {
+  document.getElementById(`dropzone-${inputId}`)?.classList.remove('has-file');
+  const nombre = document.getElementById(`dropzone-${inputId}-filename`);
+  if (nombre) nombre.textContent = '';
 }
 
 function initSidebar() {

@@ -19,6 +19,57 @@ class PruebaImportService
 
     public function importar(string $filePath, int $evaluadorId, ?string $pdfReferenciaPath = null): Prueba
     {
+        [$pruebaData, $categoriaRows, $preguntaRows, $opcionRows] = $this->leerYValidar($filePath);
+
+        return DB::transaction(function () use ($pruebaData, $categoriaRows, $preguntaRows, $opcionRows, $evaluadorId, $pdfReferenciaPath) {
+            $prueba = Prueba::create([
+                'creado_por' => $evaluadorId,
+                'titulo' => trim((string) $pruebaData['titulo']),
+                'instrucciones' => $pruebaData['instrucciones'] ?? null,
+                'tiempo_max_minutos' => ! empty($pruebaData['tiempo_max_minutos']) ? (int) $pruebaData['tiempo_max_minutos'] : null,
+                'estado' => 'borrador',
+                'pdf_referencia_path' => $pdfReferenciaPath,
+            ]);
+
+            $this->poblar($prueba, $categoriaRows, $preguntaRows, $opcionRows);
+
+            return $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
+        });
+    }
+
+    /**
+     * Reemplaza por completo las categorías/preguntas/opciones de una prueba existente
+     * a partir de un nuevo archivo. Solo debe usarse cuando la prueba todavía no tiene
+     * intentos (el llamador es responsable de esa verificación).
+     */
+    public function reemplazar(Prueba $prueba, string $filePath, ?string $pdfReferenciaPath = null): Prueba
+    {
+        [$pruebaData, $categoriaRows, $preguntaRows, $opcionRows] = $this->leerYValidar($filePath);
+
+        return DB::transaction(function () use ($prueba, $pruebaData, $categoriaRows, $preguntaRows, $opcionRows, $pdfReferenciaPath) {
+            $preguntaIds = $prueba->preguntas()->pluck('id');
+            OpcionRespuesta::whereIn('pregunta_id', $preguntaIds)->delete();
+            Pregunta::where('prueba_id', $prueba->id)->delete();
+            CategoriaEvaluacion::where('prueba_id', $prueba->id)->delete();
+
+            $prueba->update([
+                'titulo' => trim((string) $pruebaData['titulo']),
+                'instrucciones' => $pruebaData['instrucciones'] ?? null,
+                'tiempo_max_minutos' => ! empty($pruebaData['tiempo_max_minutos']) ? (int) $pruebaData['tiempo_max_minutos'] : null,
+                'pdf_referencia_path' => $pdfReferenciaPath ?? $prueba->pdf_referencia_path,
+            ]);
+
+            $this->poblar($prueba, $categoriaRows, $preguntaRows, $opcionRows);
+
+            return $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
+        });
+    }
+
+    /**
+     * @return array{0: array<string, mixed>, 1: array<int, array<string, mixed>>, 2: array<int, array<string, mixed>>, 3: array<int, array<string, mixed>>}
+     */
+    private function leerYValidar(string $filePath): array
+    {
         $sheets = Excel::toArray(new PruebaTemplateImport, $filePath);
 
         $pruebaRows = $sheets[0] ?? [];
@@ -32,7 +83,7 @@ class PruebaImportService
             throw ValidationException::withMessages(['plantilla' => $errores]);
         }
 
-        return $this->crear($pruebaRows[0], $categoriaRows, $preguntaRows, $opcionRows, $evaluadorId, $pdfReferenciaPath);
+        return [$pruebaRows[0], $categoriaRows, $preguntaRows, $opcionRows];
     }
 
     /**
@@ -112,63 +163,44 @@ class PruebaImportService
         return $errores;
     }
 
-    private function crear(
-        array $pruebaData,
-        array $categoriaRows,
-        array $preguntaRows,
-        array $opcionRows,
-        int $evaluadorId,
-        ?string $pdfReferenciaPath,
-    ): Prueba {
-        return DB::transaction(function () use ($pruebaData, $categoriaRows, $preguntaRows, $opcionRows, $evaluadorId, $pdfReferenciaPath) {
-            $prueba = Prueba::create([
-                'creado_por' => $evaluadorId,
-                'titulo' => trim((string) $pruebaData['titulo']),
-                'instrucciones' => $pruebaData['instrucciones'] ?? null,
-                'tiempo_max_minutos' => ! empty($pruebaData['tiempo_max_minutos']) ? (int) $pruebaData['tiempo_max_minutos'] : null,
-                'estado' => 'borrador',
-                'pdf_referencia_path' => $pdfReferenciaPath,
+    private function poblar(Prueba $prueba, array $categoriaRows, array $preguntaRows, array $opcionRows): void
+    {
+        $categoriaIdsPorNombre = [];
+        foreach ($categoriaRows as $orden => $row) {
+            $categoria = CategoriaEvaluacion::create([
+                'prueba_id' => $prueba->id,
+                'nombre' => trim((string) $row['nombre']),
+                'tipo_puntuacion' => strtoupper((string) $row['tipo_puntuacion']),
+                'orden' => $orden + 1,
             ]);
 
-            $categoriaIdsPorNombre = [];
-            foreach ($categoriaRows as $orden => $row) {
-                $categoria = CategoriaEvaluacion::create([
-                    'prueba_id' => $prueba->id,
-                    'nombre' => trim((string) $row['nombre']),
-                    'tipo_puntuacion' => strtoupper((string) $row['tipo_puntuacion']),
-                    'orden' => $orden + 1,
-                ]);
+            $categoriaIdsPorNombre[mb_strtolower(trim((string) $row['nombre']))] = $categoria->id;
+        }
 
-                $categoriaIdsPorNombre[mb_strtolower(trim((string) $row['nombre']))] = $categoria->id;
-            }
+        $preguntaIdsPorNumero = [];
+        foreach ($preguntaRows as $row) {
+            $categoriaId = ! empty($row['categoria'])
+                ? ($categoriaIdsPorNombre[mb_strtolower(trim((string) $row['categoria']))] ?? null)
+                : null;
 
-            $preguntaIdsPorNumero = [];
-            foreach ($preguntaRows as $row) {
-                $categoriaId = ! empty($row['categoria'])
-                    ? ($categoriaIdsPorNombre[mb_strtolower(trim((string) $row['categoria']))] ?? null)
-                    : null;
+            $pregunta = Pregunta::create([
+                'prueba_id' => $prueba->id,
+                'categoria_evaluacion_id' => $categoriaId,
+                'texto' => trim((string) $row['texto']),
+                'tipo' => $row['tipo'],
+                'orden' => (int) $row['numero'],
+            ]);
 
-                $pregunta = Pregunta::create([
-                    'prueba_id' => $prueba->id,
-                    'categoria_evaluacion_id' => $categoriaId,
-                    'texto' => trim((string) $row['texto']),
-                    'tipo' => $row['tipo'],
-                    'orden' => (int) $row['numero'],
-                ]);
+            $preguntaIdsPorNumero[(string) $row['numero']] = $pregunta->id;
+        }
 
-                $preguntaIdsPorNumero[(string) $row['numero']] = $pregunta->id;
-            }
-
-            foreach ($opcionRows as $orden => $row) {
-                OpcionRespuesta::create([
-                    'pregunta_id' => $preguntaIdsPorNumero[(string) $row['pregunta_numero']],
-                    'texto' => (string) $row['texto'],
-                    'peso' => (float) $row['peso'],
-                    'orden' => isset($row['orden']) && $row['orden'] !== '' ? (int) $row['orden'] : $orden + 1,
-                ]);
-            }
-
-            return $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
-        });
+        foreach ($opcionRows as $orden => $row) {
+            OpcionRespuesta::create([
+                'pregunta_id' => $preguntaIdsPorNumero[(string) $row['pregunta_numero']],
+                'texto' => (string) $row['texto'],
+                'peso' => (float) $row['peso'],
+                'orden' => isset($row['orden']) && $row['orden'] !== '' ? (int) $row['orden'] : $orden + 1,
+            ]);
+        }
     }
 }

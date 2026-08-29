@@ -84,6 +84,45 @@ class PruebaController extends Controller
         return response()->json($prueba, 201);
     }
 
+    public function update(Request $request, Prueba $prueba)
+    {
+        $this->authorizeAcceso($prueba);
+
+        $data = $request->validate([
+            'titulo' => ['required', 'string', 'max:255'],
+            'instrucciones' => ['nullable', 'string'],
+        ]);
+
+        $prueba->update($data);
+
+        return $prueba;
+    }
+
+    public function reimportar(Request $request, Prueba $prueba, PruebaImportService $importService)
+    {
+        $this->authorizeAcceso($prueba);
+        abort_unless($prueba->tipo === 'cuestionario', 422, 'Solo las pruebas tipo cuestionario admiten reemplazar su contenido.');
+        abort_unless($prueba->estado === 'borrador', 422, 'Solo se puede reemplazar el contenido de una prueba en borrador.');
+        abort_if($prueba->intentos()->exists(), 422, 'No se puede reemplazar el contenido: ya hay intentos de estudiantes sobre esta prueba.');
+
+        $data = $request->validate([
+            'archivo' => ['required', 'file', 'mimes:xlsx,xls'],
+            'pdf_referencia' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $pdfPath = $request->hasFile('pdf_referencia')
+            ? $request->file('pdf_referencia')->store('pruebas-referencia', 'local')
+            : null;
+
+        $prueba = $importService->reemplazar(
+            $prueba,
+            $data['archivo']->getRealPath(),
+            $pdfPath,
+        );
+
+        return response()->json($prueba);
+    }
+
     public function publicar(Prueba $prueba)
     {
         $this->authorizeAcceso($prueba);
@@ -144,6 +183,7 @@ class PruebaController extends Controller
                     'categoria' => $resultado->categoria->nombre,
                     'puntaje' => $resultado->puntaje,
                     'etiqueta' => $resultado->etiqueta_interpretacion,
+                    'recomendacion' => $resultado->recomendacion,
                 ]),
             ]);
     }

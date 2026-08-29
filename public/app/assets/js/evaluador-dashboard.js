@@ -33,51 +33,6 @@
     Api.download('/api/estudiantes/exportar', 'estudiantes.xlsx');
   });
 
-  function initDropzone(inputId, iconoSvg) {
-    const input = document.getElementById(inputId);
-    const zone = document.getElementById(`dropzone-${inputId}`);
-    const icono = document.getElementById(`dropzone-${inputId}-icon`);
-    const nombre = document.getElementById(`dropzone-${inputId}-filename`);
-    if (!input || !zone) return;
-
-    icono.innerHTML = iconoSvg;
-
-    function actualizar() {
-      const archivo = input.files[0];
-      zone.classList.toggle('has-file', !!archivo);
-      nombre.textContent = archivo ? archivo.name : '';
-    }
-
-    input.addEventListener('change', actualizar);
-
-    ['dragenter', 'dragover'].forEach((evento) => {
-      zone.addEventListener(evento, (e) => {
-        e.preventDefault();
-        zone.classList.add('dragover');
-      });
-    });
-
-    ['dragleave', 'drop'].forEach((evento) => {
-      zone.addEventListener(evento, (e) => {
-        e.preventDefault();
-        zone.classList.remove('dragover');
-      });
-    });
-
-    zone.addEventListener('drop', (e) => {
-      if (e.dataTransfer.files.length) {
-        input.files = e.dataTransfer.files;
-        actualizar();
-      }
-    });
-  }
-
-  function resetDropzone(inputId) {
-    document.getElementById(`dropzone-${inputId}`)?.classList.remove('has-file');
-    const nombre = document.getElementById(`dropzone-${inputId}-filename`);
-    if (nombre) nombre.textContent = '';
-  }
-
   initDropzone('archivo', Icons.fileText);
   initDropzone('pdf_referencia', Icons.fileText);
 
@@ -146,11 +101,25 @@
           </div>
         </td>
         <td>${esc(e.email)}</td>
-        <td style="text-align:right">
+        <td style="text-align:right;white-space:nowrap">
+          <button type="button" class="icon-btn" style="margin-top:0" title="Restablecer contraseña" data-resetear="${e.id}" data-nombre="${esc(e.name)}">${Icons.key}</button>
           <button type="button" class="icon-btn" style="margin-top:0" title="Eliminar estudiante" data-eliminar="${e.id}" data-nombre="${esc(e.name)}">${Icons.trash}</button>
         </td>
       </tr>
     `).join('');
+
+    body.querySelectorAll('[data-resetear]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const nueva = prompt(`Nueva contraseña para ${btn.dataset.nombre} (mínimo 8 caracteres):`);
+        if (!nueva) return;
+        if (nueva.length < 8) {
+          alert('La contraseña debe tener al menos 8 caracteres.');
+          return;
+        }
+        await Api.post(`/api/estudiantes/${btn.dataset.resetear}/reset-password`, { password: nueva });
+        alert(`Contraseña de ${btn.dataset.nombre} actualizada.`);
+      });
+    });
 
     body.querySelectorAll('[data-eliminar]').forEach((btn) => {
       btn.addEventListener('click', async () => {
