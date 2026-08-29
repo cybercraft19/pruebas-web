@@ -37,7 +37,7 @@ class ScoringTest extends TestCase
             'tipo_puntuacion' => 'PROMEDIO',
             'orden' => 1,
         ]);
-        InterpretacionCategoria::create(['categoria_evaluacion_id' => $cognitiva->id, 'valor_min' => 1, 'valor_max' => 3, 'etiqueta' => 'Bajo']);
+        InterpretacionCategoria::create(['categoria_evaluacion_id' => $cognitiva->id, 'valor_min' => 1, 'valor_max' => 3, 'etiqueta' => 'Bajo', 'recomendacion' => 'Seguí así.']);
         InterpretacionCategoria::create(['categoria_evaluacion_id' => $cognitiva->id, 'valor_min' => 3.01, 'valor_max' => 5, 'etiqueta' => 'Alto']);
 
         $verbal = CategoriaEvaluacion::create([
@@ -87,6 +87,7 @@ class ScoringTest extends TestCase
         $cognitivaResultado = $resultados->firstWhere('categoria_evaluacion_id', $cognitiva->id);
         $this->assertEquals(3, $cognitivaResultado['puntaje']);
         $this->assertEquals('Bajo', $cognitivaResultado['etiqueta_interpretacion']);
+        $this->assertEquals('Seguí así.', $cognitivaResultado['recomendacion']);
 
         $verbalResultado = $resultados->firstWhere('categoria_evaluacion_id', $verbal->id);
         $this->assertEquals(1, $verbalResultado['puntaje']);

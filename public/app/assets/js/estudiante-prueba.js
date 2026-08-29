@@ -44,7 +44,7 @@
       </div>
       <div style="overflow-x:auto">
         <table>
-          <thead><tr><th>Categoría</th><th>Puntaje</th><th>Interpretación</th></tr></thead>
+          <thead><tr><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Recomendación</th></tr></thead>
           <tbody id="resultados-body"></tbody>
         </table>
       </div>
@@ -54,8 +54,9 @@
         <td>${r.categoria ? esc(r.categoria.nombre) : '—'}</td>
         <td>${r.puntaje}</td>
         <td>${r.etiqueta_interpretacion ? `<span class="badge ${BADGE_POR_ETIQUETA[r.etiqueta_interpretacion] || 'info'}">${esc(r.etiqueta_interpretacion)}</span>` : '—'}</td>
+        <td class="muted" style="font-size:0.85rem">${r.recomendacion ? esc(r.recomendacion) : '—'}</td>
       </tr>
-    `).join('') || '<tr><td colspan="3" class="muted">Sin resultados.</td></tr>';
+    `).join('') || '<tr><td colspan="4" class="muted">Sin resultados.</td></tr>';
     lanzarConfeti(document.getElementById('confetti-host'));
   }
 

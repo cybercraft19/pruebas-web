@@ -69,9 +69,18 @@ class PruebasReferenciaSeeder extends Seeder
                 'orden' => $orden,
             ]);
 
-            InterpretacionCategoria::create(['categoria_evaluacion_id' => $categoria->id, 'valor_min' => 1, 'valor_max' => 3, 'etiqueta' => 'Bajo']);
-            InterpretacionCategoria::create(['categoria_evaluacion_id' => $categoria->id, 'valor_min' => 3.01, 'valor_max' => 4, 'etiqueta' => 'Medio']);
-            InterpretacionCategoria::create(['categoria_evaluacion_id' => $categoria->id, 'valor_min' => 4.01, 'valor_max' => 5, 'etiqueta' => 'Alto']);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 1, 'valor_max' => 3, 'etiqueta' => 'Bajo',
+                'recomendacion' => 'Tu nivel de ansiedad ante los exámenes está dentro de un rango saludable. Mantené tus hábitos de estudio y descanso.',
+            ]);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 3.01, 'valor_max' => 4, 'etiqueta' => 'Medio',
+                'recomendacion' => 'Notás algo de ansiedad ante los exámenes. Organizar el estudio con anticipación y practicar técnicas de respiración puede ayudarte.',
+            ]);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 4.01, 'valor_max' => 5, 'etiqueta' => 'Alto',
+                'recomendacion' => 'Tu nivel de ansiedad es alto. Te recomendamos hablar con un orientador o psicólogo escolar, y practicar técnicas de relajación antes de rendir.',
+            ]);
 
             $categorias[$nombre] = $categoria;
         }
@@ -150,8 +159,14 @@ class PruebasReferenciaSeeder extends Seeder
                 'orden' => $orden,
             ]);
 
-            InterpretacionCategoria::create(['categoria_evaluacion_id' => $categoria->id, 'valor_min' => 0, 'valor_max' => 3, 'etiqueta' => 'Estándar']);
-            InterpretacionCategoria::create(['categoria_evaluacion_id' => $categoria->id, 'valor_min' => 4, 'valor_max' => 5, 'etiqueta' => 'Fortaleza']);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 0, 'valor_max' => 3, 'etiqueta' => 'Estándar',
+                'recomendacion' => "No es una de tus inteligencias más marcadas todavía, pero podés desarrollarla con práctica si te interesa la {$info['nombre']}.",
+            ]);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 4, 'valor_max' => 5, 'etiqueta' => 'Fortaleza',
+                'recomendacion' => "Esta es una de tus fortalezas: {$info['nombre']}. Aprovechala en cómo elegís estudiar y en tus proyectos.",
+            ]);
 
             $categorias[$letra] = $categoria;
             foreach ($info['preguntas'] as $numero) {

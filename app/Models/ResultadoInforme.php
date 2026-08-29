@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table('resultados_informe')]
-#[Fillable(['intento_id', 'categoria_evaluacion_id', 'puntaje', 'etiqueta_interpretacion'])]
+#[Fillable(['intento_id', 'categoria_evaluacion_id', 'puntaje', 'etiqueta_interpretacion', 'recomendacion'])]
 class ResultadoInforme extends Model
 {
     protected function casts(): array

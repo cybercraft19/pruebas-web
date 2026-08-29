@@ -41,13 +41,16 @@ class ScoringService
             ? round($suma / $preguntaIds->count(), 2)
             : round($suma, 2);
 
-        $etiqueta = $categoria->interpretaciones
-            ->first(fn ($interpretacion) => $puntaje >= $interpretacion->valor_min && $puntaje <= $interpretacion->valor_max)
-            ?->etiqueta;
+        $interpretacion = $categoria->interpretaciones
+            ->first(fn ($interpretacion) => $puntaje >= $interpretacion->valor_min && $puntaje <= $interpretacion->valor_max);
 
         return ResultadoInforme::updateOrCreate(
             ['intento_id' => $intento->id, 'categoria_evaluacion_id' => $categoria->id],
-            ['puntaje' => $puntaje, 'etiqueta_interpretacion' => $etiqueta]
+            [
+                'puntaje' => $puntaje,
+                'etiqueta_interpretacion' => $interpretacion?->etiqueta,
+                'recomendacion' => $interpretacion?->recomendacion,
+            ]
         );
     }
 }
