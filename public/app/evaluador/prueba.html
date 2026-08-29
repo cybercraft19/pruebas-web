@@ -6,49 +6,115 @@
   <title>Detalle de la prueba — Sistema de Pruebas</title>
   <link rel="stylesheet" href="/app/assets/css/style.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <style>
+    #resultados-table.dataTable { font-family: var(--font-sans); font-size: 0.88rem; }
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      padding: 5px 8px;
+      margin-left: 6px;
+      font-family: var(--font-sans);
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--color-primary) !important;
+      color: #fff !important;
+      border-radius: var(--radius-sm);
+      border: none !important;
+    }
+  </style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>Detalle de la prueba</h1>
-    <div class="user-info">
-      <a class="link" href="/app/evaluador/index.html" style="color:#fff">← Volver</a>
-      <button class="secondary small" id="logout-btn">Salir</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="card">
-      <div class="flex-between">
-        <div>
-          <h2 id="titulo"></h2>
-          <span class="badge" id="estado-badge"></span>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">SP</div>
+        <div class="sidebar__brand-text">
+          <strong>Sistema de Pruebas</strong>
+          <span>Panel del evaluador</span>
         </div>
-        <button id="publicar-btn">Publicar prueba</button>
       </div>
-      <p id="instrucciones" class="muted"></p>
-    </div>
+      <nav class="sidebar__nav">
+        <div class="nav-section">General</div>
+        <a class="nav-link" href="/app/evaluador/index.html#top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Panel
+        </a>
+        <a class="nav-link active" href="/app/evaluador/index.html#mis-pruebas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+          Mis pruebas
+        </a>
+        <a class="nav-link" href="/app/evaluador/index.html#estudiantes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Estudiantes
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="avatar" id="user-avatar">E</div>
+        <div class="user-meta">
+          <strong id="user-name">—</strong>
+          <span>Evaluador</span>
+        </div>
+        <button class="icon-btn" id="logout-btn" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
+      </div>
+    </aside>
 
-    <div class="card">
-      <h2>Categorías y tipo de puntuación</h2>
-      <table>
-        <thead><tr><th>Categoría</th><th>Tipo de puntuación</th></tr></thead>
-        <tbody id="categorias-body"></tbody>
-      </table>
-    </div>
+    <div class="main">
+      <header class="main__topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
+        <a class="link" href="/app/evaluador/index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem" id="volver-link">Volver al panel</a>
+      </header>
 
-    <div class="card">
-      <h2>Preguntas</h2>
-      <div id="preguntas-body"></div>
-    </div>
+      <div class="main__content">
+        <div class="container">
+          <div class="card">
+            <div class="flex-between">
+              <div>
+                <div class="flex-between" style="justify-content: flex-start; gap: 12px">
+                  <h1 id="titulo" style="font-size:1.3rem">Prueba</h1>
+                  <span class="badge" id="estado-badge"></span>
+                </div>
+                <p id="instrucciones" class="muted" style="margin-top:8px"></p>
+              </div>
+              <button id="publicar-btn"></button>
+            </div>
+          </div>
 
-    <div class="card">
-      <h2>Resultados de estudiantes</h2>
-      <table id="resultados-table" class="display" style="width:100%">
-        <thead>
-          <tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Finalizado</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+          <div class="card" id="categorias-card">
+            <div class="section-title">Categorías y tipo de puntuación</div>
+            <div class="categorias-grid" id="categorias-body"></div>
+          </div>
+
+          <div class="card" id="preguntas-card">
+            <details class="details-toggle" open>
+              <summary>
+                <span>Preguntas</span>
+                <span class="muted" id="preguntas-count"></span>
+              </summary>
+              <div id="preguntas-body" style="margin-top:14px"></div>
+            </details>
+          </div>
+
+          <div class="card" id="tmt-card" style="display:none">
+            <div class="section-title">Diseño del Trail Making Test</div>
+            <div class="stats-grid" id="tmt-resumen"></div>
+          </div>
+
+          <div class="card">
+            <div class="flex-between" style="margin-bottom: 16px">
+              <div class="section-title" style="margin-bottom: 0">Resultados de estudiantes</div>
+              <button type="button" class="secondary small" id="exportar-resultados-btn"></button>
+            </div>
+            <div style="overflow-x:auto">
+              <table id="resultados-table" class="display" style="width:100%">
+                <thead id="resultados-head"></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

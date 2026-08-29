@@ -7,82 +7,211 @@
   <link rel="stylesheet" href="/app/assets/css/style.css" />
 </head>
 <body>
-  <div class="topbar">
-    <h1>Panel del evaluador</h1>
-    <div class="user-info">
-      <span id="user-name"></span>
-      <button class="secondary small" id="logout-btn">Salir</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="card">
-      <h2>Subir una prueba nueva</h2>
-      <p class="muted">
-        1) Descarga la plantilla Excel. 2) Complétala con las preguntas, categorías y pesos.
-        3) Súbela aquí (opcionalmente junto al PDF original de referencia).
-      </p>
-      <button class="secondary" id="descargar-plantilla">Descargar plantilla Excel</button>
-
-      <form id="import-form" style="margin-top: 20px">
-        <label for="archivo">Archivo Excel (.xlsx)</label>
-        <input type="file" id="archivo" accept=".xlsx,.xls" required />
-
-        <label for="pdf_referencia">PDF de referencia (opcional)</label>
-        <input type="file" id="pdf_referencia" accept="application/pdf" />
-
-        <button type="submit">Importar prueba</button>
-        <div class="error" id="import-error"></div>
-        <div class="success" id="import-success"></div>
-      </form>
-    </div>
-
-    <div class="card">
-      <div class="flex-between">
-        <h2>Mis pruebas</h2>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">SP</div>
+        <div class="sidebar__brand-text">
+          <strong>Sistema de Pruebas</strong>
+          <span>Panel del evaluador</span>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Estado</th>
-            <th>Preguntas</th>
-            <th>Categorías</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="pruebas-body">
-          <tr><td colspan="5" class="muted">Cargando…</td></tr>
-        </tbody>
-      </table>
-    </div>
+      <nav class="sidebar__nav">
+        <div class="nav-section">General</div>
+        <a class="nav-link active" href="#top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Panel
+        </a>
 
-    <div class="card">
-      <h2>Estudiantes</h2>
-      <form id="estudiante-form" class="flex-between" style="align-items: flex-end">
-        <div style="flex: 1">
-          <label for="est-name">Nombre</label>
-          <input type="text" id="est-name" required />
+        <div class="nav-section">Gestión</div>
+        <a class="nav-link" href="#crear-cuestionario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Subir cuestionario
+        </a>
+        <a class="nav-link" href="#crear-tmt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 15"/><path d="M9 1h6"/></svg>
+          Crear TMT
+        </a>
+        <a class="nav-link" href="#mis-pruebas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+          Mis pruebas
+        </a>
+        <a class="nav-link" href="#estudiantes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Estudiantes
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="avatar" id="user-avatar">E</div>
+        <div class="user-meta">
+          <strong id="user-name">—</strong>
+          <span>Evaluador</span>
         </div>
-        <div style="flex: 1">
-          <label for="est-email">Correo</label>
-          <input type="email" id="est-email" required />
+        <button class="icon-btn" id="logout-btn" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="main__topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
+        <div class="main__topbar-titles">
+          <strong>Panel del evaluador</strong>
+          <span>Gestiona pruebas, estudiantes y resultados</span>
         </div>
-        <div style="flex: 1">
-          <label for="est-password">Contraseña</label>
-          <input type="password" id="est-password" required minlength="8" />
+      </header>
+
+      <div class="main__content">
+        <div class="container" id="top">
+          <div class="page-header">
+            <div>
+              <h1 class="page-header__greeting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
+                Buen día
+              </h1>
+              <p>Administra tus pruebas, tus estudiantes y revisa los resultados desde un solo lugar.</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card__icon"></div>
+              <div>
+                <div class="stat-card__value" id="stat-total">—</div>
+                <div class="stat-card__label">Pruebas creadas</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon"></div>
+              <div>
+                <div class="stat-card__value" id="stat-publicadas">—</div>
+                <div class="stat-card__label">Publicadas</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon"></div>
+              <div>
+                <div class="stat-card__value" id="stat-estudiantes">—</div>
+                <div class="stat-card__label">Estudiantes</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" id="crear-cuestionario">
+            <div class="section-title">Subir una prueba tipo cuestionario</div>
+            <p class="section-subtitle">
+              1) Descarga la plantilla Excel. 2) Complétala con las preguntas, categorías y pesos.
+              3) Súbela aquí (opcionalmente junto al PDF original de referencia).
+            </p>
+            <button class="secondary" id="descargar-plantilla"></button>
+
+            <hr class="divider" />
+
+            <form id="import-form">
+              <div class="form-row">
+                <div>
+                  <label for="archivo">Archivo Excel (.xlsx)</label>
+                  <label class="dropzone" for="archivo" id="dropzone-archivo">
+                    <input type="file" id="archivo" accept=".xlsx,.xls" required />
+                    <div class="dropzone__icon" id="dropzone-archivo-icon"></div>
+                    <div class="dropzone__text">
+                      <strong>Hacé clic o arrastrá el archivo aquí</strong>
+                      <span>.xlsx o .xls</span>
+                    </div>
+                    <div class="dropzone__filename" id="dropzone-archivo-filename"></div>
+                  </label>
+                </div>
+                <div>
+                  <label for="pdf_referencia">PDF de referencia (opcional)</label>
+                  <label class="dropzone" for="pdf_referencia" id="dropzone-pdf_referencia">
+                    <input type="file" id="pdf_referencia" accept="application/pdf" />
+                    <div class="dropzone__icon" id="dropzone-pdf_referencia-icon"></div>
+                    <div class="dropzone__text">
+                      <strong>Hacé clic o arrastrá el PDF aquí</strong>
+                      <span>Opcional — hasta 10 MB</span>
+                    </div>
+                    <div class="dropzone__filename" id="dropzone-pdf_referencia-filename"></div>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" id="import-submit"></button>
+              <div class="error" id="import-error"></div>
+              <div class="success" id="import-success"></div>
+            </form>
+          </div>
+
+          <div class="card" id="crear-tmt">
+            <div class="section-title">Crear prueba TMT (Trail Making Test)</div>
+            <p class="section-subtitle">
+              Prueba de ejecución motora sobre un lienzo interactivo: el estudiante conecta círculos en orden
+              contrarreloj. El diseño de las partes A y B se genera automáticamente.
+            </p>
+            <form id="tmt-form">
+              <label for="tmt-titulo">Título</label>
+              <input type="text" id="tmt-titulo" required placeholder="Trail Making Test — 3° grado" />
+
+              <label for="tmt-instrucciones">Instrucciones (opcional)</label>
+              <textarea id="tmt-instrucciones" rows="2" placeholder="Indicaciones adicionales para el estudiante"></textarea>
+
+              <button type="submit" id="tmt-submit"></button>
+              <div class="error" id="tmt-error"></div>
+              <div class="success" id="tmt-success"></div>
+            </form>
+          </div>
+
+          <div class="card" id="mis-pruebas">
+            <div class="flex-between" style="margin-bottom: 16px">
+              <div class="section-title" style="margin-bottom: 0">Mis pruebas</div>
+            </div>
+            <div class="test-grid" id="pruebas-grid">
+              <div class="skeleton-bar" style="height:150px;border-radius:var(--radius-md)"></div>
+              <div class="skeleton-bar" style="height:150px;border-radius:var(--radius-md)"></div>
+              <div class="skeleton-bar" style="height:150px;border-radius:var(--radius-md)"></div>
+            </div>
+          </div>
+
+          <div class="card" id="estudiantes">
+            <div class="section-title">Estudiantes</div>
+            <p class="section-subtitle">Crea cuentas de acceso para que tus estudiantes puedan presentar pruebas.</p>
+            <form id="estudiante-form">
+              <div class="form-row">
+                <div>
+                  <label for="est-name">Nombre</label>
+                  <input type="text" id="est-name" required placeholder="Nombre completo" />
+                </div>
+                <div>
+                  <label for="est-email">Correo</label>
+                  <input type="email" id="est-email" required placeholder="nombre@correo.com" />
+                </div>
+                <div>
+                  <label for="est-password">Contraseña</label>
+                  <input type="password" id="est-password" required minlength="8" placeholder="Mínimo 8 caracteres" />
+                </div>
+              </div>
+              <button type="submit" id="estudiante-submit"></button>
+            </form>
+            <div class="error" id="estudiante-error"></div>
+
+            <hr class="divider" />
+
+            <div class="flex-between" style="margin-bottom: 12px">
+              <span class="muted" id="estudiantes-count"></span>
+              <button type="button" class="secondary small" id="exportar-estudiantes-btn"></button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr><th>Nombre</th><th>Correo</th><th></th></tr>
+                </thead>
+                <tbody id="estudiantes-body">
+                  <tr class="skeleton-row"><td colspan="3"><div class="skeleton-bar"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <button type="submit">Crear</button>
-      </form>
-      <div class="error" id="estudiante-error"></div>
-      <table style="margin-top: 16px">
-        <thead>
-          <tr><th>Nombre</th><th>Correo</th></tr>
-        </thead>
-        <tbody id="estudiantes-body">
-          <tr><td colspan="2" class="muted">Cargando…</td></tr>
-        </tbody>
-      </table>
+      </div>
     </div>
   </div>
 

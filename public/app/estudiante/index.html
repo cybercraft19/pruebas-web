@@ -7,33 +7,82 @@
   <link rel="stylesheet" href="/app/assets/css/style.css" />
 </head>
 <body>
-  <div class="topbar">
-    <h1>Mis pruebas</h1>
-    <div class="user-info">
-      <span id="user-name"></span>
-      <button class="secondary small" id="logout-btn">Salir</button>
-    </div>
-  </div>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">SP</div>
+        <div class="sidebar__brand-text">
+          <strong>Sistema de Pruebas</strong>
+          <span>Panel del estudiante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="nav-section">General</div>
+        <a class="nav-link active" href="#top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Panel
+        </a>
+        <a class="nav-link" href="#disponibles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Pruebas disponibles
+        </a>
+        <a class="nav-link" href="#historial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/></svg>
+          Mi historial
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="avatar" id="user-avatar">E</div>
+        <div class="user-meta">
+          <strong id="user-name">—</strong>
+          <span>Estudiante</span>
+        </div>
+        <button class="icon-btn" id="logout-btn" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
+      </div>
+    </aside>
 
-  <div class="container">
-    <div class="card">
-      <h2>Pruebas disponibles</h2>
-      <table>
-        <thead><tr><th>Título</th><th>Preguntas</th><th>Tiempo máx.</th><th></th></tr></thead>
-        <tbody id="disponibles-body">
-          <tr><td colspan="4" class="muted">Cargando…</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="main">
+      <header class="main__topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
+        <div class="main__topbar-titles">
+          <strong>Panel del estudiante</strong>
+          <span>Tus pruebas y resultados</span>
+        </div>
+      </header>
 
-    <div class="card">
-      <h2>Mi historial</h2>
-      <table>
-        <thead><tr><th>Prueba</th><th>Estado</th><th></th></tr></thead>
-        <tbody id="historial-body">
-          <tr><td colspan="3" class="muted">Cargando…</td></tr>
-        </tbody>
-      </table>
+      <div class="main__content">
+        <div class="container" id="top">
+          <div class="page-header">
+            <div>
+              <h1 class="page-header__greeting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
+                Hola
+              </h1>
+              <p>Estas son las pruebas disponibles para ti. Elige una para comenzar.</p>
+            </div>
+          </div>
+
+          <div class="card" id="disponibles">
+            <div class="section-title">Pruebas disponibles</div>
+            <div class="test-grid" id="disponibles-grid">
+              <div class="skeleton-bar" style="height:150px;border-radius:var(--radius-md)"></div>
+            </div>
+          </div>
+
+          <div class="card" id="historial">
+            <div class="section-title">Mi historial</div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Prueba</th><th>Estado</th><th></th></tr></thead>
+                <tbody id="historial-body">
+                  <tr class="skeleton-row"><td colspan="3"><div class="skeleton-bar"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

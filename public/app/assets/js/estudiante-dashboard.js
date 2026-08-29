@@ -1,35 +1,56 @@
 (async () => {
   const user = await requireSession('estudiante');
   if (!user) return;
-  document.getElementById('user-name').textContent = `${user.name} (estudiante)`;
 
-  document.getElementById('logout-btn').addEventListener('click', async () => {
+  initSidebar();
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+  const logoutBtn = document.getElementById('logout-btn');
+  logoutBtn.innerHTML = Icons.logout;
+  logoutBtn.addEventListener('click', async () => {
     await Api.post('/api/logout');
     window.location.href = '/app/login.html';
   });
 
+  function emptyState(mensaje) {
+    return `<div class="empty-state">${Icons.inbox}<p>${mensaje}</p></div>`;
+  }
+
   async function cargarDisponibles() {
     const pruebas = await Api.get('/api/pruebas-publicadas');
-    const body = document.getElementById('disponibles-body');
+    const grid = document.getElementById('disponibles-grid');
 
     if (pruebas.length === 0) {
-      body.innerHTML = '<tr><td colspan="4" class="muted">No hay pruebas disponibles por ahora.</td></tr>';
+      grid.innerHTML = emptyState('No hay pruebas disponibles por ahora.');
       return;
     }
 
-    body.innerHTML = pruebas.map((p) => `
-      <tr>
-        <td>${p.titulo}</td>
-        <td>${p.preguntas_count}</td>
-        <td>${p.tiempo_max_minutos ? p.tiempo_max_minutos + ' min' : '—'}</td>
-        <td><button class="small" data-prueba-id="${p.id}">Iniciar</button></td>
-      </tr>
-    `).join('');
+    grid.innerHTML = pruebas.map((p) => {
+      const esTmt = p.tipo === 'tmt';
+      return `
+      <div class="test-card">
+        <div class="test-card__top">
+          <div class="test-card__icon ${esTmt ? 'tmt' : ''}">${esTmt ? Icons.stopwatch : Icons.fileText}</div>
+          <span class="badge info">${esTmt ? 'TMT' : 'Cuestionario'}</span>
+        </div>
+        <h3>${p.titulo}</h3>
+        <div class="test-card__meta">
+          <span>${Icons.fileText} ${esTmt ? 'Lienzo interactivo' : `${p.preguntas_count} preguntas`}</span>
+          ${p.tiempo_max_minutos ? `<span>${Icons.stopwatch} ${p.tiempo_max_minutos} min</span>` : ''}
+        </div>
+        <button class="block" data-prueba-id="${p.id}" data-tipo="${p.tipo}">${Icons.play} Iniciar</button>
+      </div>
+    `;
+    }).join('');
 
-    body.querySelectorAll('button[data-prueba-id]').forEach((btn) => {
+    grid.querySelectorAll('button[data-prueba-id]').forEach((btn) => {
       btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Iniciando…';
         const intento = await Api.post('/api/intentos', { prueba_id: Number(btn.dataset.pruebaId) });
-        window.location.href = `/app/estudiante/prueba.html?intento=${intento.id}`;
+        const destino = btn.dataset.tipo === 'tmt' ? 'tmt' : 'prueba';
+        window.location.href = `/app/estudiante/${destino}.html?intento=${intento.id}`;
       });
     });
   }
@@ -39,17 +60,20 @@
     const body = document.getElementById('historial-body');
 
     if (intentos.length === 0) {
-      body.innerHTML = '<tr><td colspan="3" class="muted">Aún no has presentado ninguna prueba.</td></tr>';
+      body.innerHTML = `<tr><td colspan="3">${emptyState('Aún no has presentado ninguna prueba.')}</td></tr>`;
       return;
     }
 
-    body.innerHTML = intentos.map((i) => `
+    body.innerHTML = intentos.map((i) => {
+      const destino = i.prueba.tipo === 'tmt' ? 'tmt' : 'prueba';
+      return `
       <tr>
         <td>${i.prueba.titulo}</td>
-        <td><span class="badge ${i.estado === 'finalizado' ? 'publicada' : 'borrador'}">${i.estado}</span></td>
-        <td><a class="link" href="/app/estudiante/prueba.html?intento=${i.id}">${i.estado === 'finalizado' ? 'Ver resultado' : 'Continuar'}</a></td>
+        <td><span class="badge ${i.estado === 'finalizado' ? 'publicada' : 'borrador'}">${i.estado === 'finalizado' ? 'Finalizado' : 'En progreso'}</span></td>
+        <td><a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">${i.estado === 'finalizado' ? 'Ver resultado' : 'Continuar'}</a></td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   }
 
   cargarDisponibles();
