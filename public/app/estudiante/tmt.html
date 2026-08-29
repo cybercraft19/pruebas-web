@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trail Making Test — Sistema de Pruebas</title>
+  <link rel="stylesheet" href="/app/assets/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">
+        <div class="brand-mark">SP</div>
+        <div class="sidebar__brand-text">
+          <strong>Sistema de Pruebas</strong>
+          <span>Panel del estudiante</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="nav-section">General</div>
+        <a class="nav-link" href="/app/estudiante/index.html#top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Panel
+        </a>
+        <a class="nav-link active" href="/app/estudiante/index.html#disponibles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Pruebas disponibles
+        </a>
+        <a class="nav-link" href="/app/estudiante/index.html#historial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/></svg>
+          Mi historial
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="avatar" id="user-avatar">E</div>
+        <div class="user-meta">
+          <strong id="user-name">—</strong>
+          <span>Estudiante</span>
+        </div>
+        <button class="icon-btn" id="logout-btn" title="Cerrar sesión" aria-label="Cerrar sesión"></button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="main__topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
+        <a class="link" href="/app/estudiante/index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem" id="volver-link">Volver al panel</a>
+      </header>
+
+      <div class="main__content">
+        <div class="container">
+          <div class="card" id="instrucciones-card">
+            <h1 id="titulo" style="font-size:1.3rem">Trail Making Test</h1>
+            <p id="instrucciones" class="muted" style="margin-top:8px"></p>
+          </div>
+
+          <div class="card" id="progreso-card" style="display:none">
+            <div class="flex-between" style="margin-bottom: 6px">
+              <span class="muted" id="paso-label"></span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="paso-fill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="card" id="stage"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js"></script>
+  <script src="/app/assets/js/estudiante-tmt.js"></script>
+</body>
+</html>
