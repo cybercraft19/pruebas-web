@@ -51,9 +51,9 @@
     `;
     document.getElementById('resultados-body').innerHTML = intento.resultados.map((r) => `
       <tr>
-        <td>${r.categoria ? r.categoria.nombre : '—'}</td>
+        <td>${r.categoria ? esc(r.categoria.nombre) : '—'}</td>
         <td>${r.puntaje}</td>
-        <td>${r.etiqueta_interpretacion ? `<span class="badge ${BADGE_POR_ETIQUETA[r.etiqueta_interpretacion] || 'info'}">${r.etiqueta_interpretacion}</span>` : '—'}</td>
+        <td>${r.etiqueta_interpretacion ? `<span class="badge ${BADGE_POR_ETIQUETA[r.etiqueta_interpretacion] || 'info'}">${esc(r.etiqueta_interpretacion)}</span>` : '—'}</td>
       </tr>
     `).join('') || '<tr><td colspan="3" class="muted">Sin resultados.</td></tr>';
     lanzarConfeti(document.getElementById('confetti-host'));
@@ -97,8 +97,8 @@
           const etiqueta = separador === -1 ? '' : o.texto.slice(separador + 3);
           return `
             <button type="button" class="scale-btn ${seleccionActual === o.id ? 'selected' : ''}" data-opcion="${o.id}">
-              <span class="scale-btn__num">${numero}</span>
-              <span class="scale-btn__label">${etiqueta}</span>
+              <span class="scale-btn__num">${esc(numero)}</span>
+              <span class="scale-btn__label">${esc(etiqueta)}</span>
             </button>
           `;
         }).join('')}</div>`;
@@ -110,14 +110,14 @@
           return `
             <button type="button" class="tf-btn ${esVerdadero ? 'tf-btn--true' : 'tf-btn--false'} ${seleccionActual === o.id ? 'selected' : ''}" data-opcion="${o.id}">
               ${esVerdadero ? Icons.checkCircle : Icons.xCircle}
-              ${o.texto}
+              ${esc(o.texto)}
             </button>
           `;
         }).join('')}</div>`;
       }
 
       return `<div class="opciones-list">${p.opciones.map((o) => `
-        <button type="button" class="option-btn ${seleccionActual === o.id ? 'selected' : ''}" data-opcion="${o.id}">${o.texto}</button>
+        <button type="button" class="option-btn ${seleccionActual === o.id ? 'selected' : ''}" data-opcion="${o.id}">${esc(o.texto)}</button>
       `).join('')}</div>`;
     }
 
@@ -130,10 +130,10 @@
 
       quizBody.innerHTML = `
         <div class="quiz-meta">
-          ${categoria ? `<span class="badge info">${Icons.tag} ${categoria.nombre}</span>` : '<span></span>'}
+          ${categoria ? `<span class="badge info">${Icons.tag} ${esc(categoria.nombre)}</span>` : '<span></span>'}
           <span class="quiz-meta__counter">Pregunta ${indice + 1} de ${preguntas.length}</span>
         </div>
-        <div class="quiz-question">${p.texto}</div>
+        <div class="quiz-question">${esc(p.texto)}</div>
         ${renderOpciones(p, seleccionActual)}
         <div class="quiz-nav">
           <button type="button" class="secondary" id="quiz-anterior" ${indice === 0 ? 'disabled' : ''}>${Icons.chevronLeft} Anterior</button>

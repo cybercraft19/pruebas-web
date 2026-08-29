@@ -80,6 +80,12 @@ async function requireSession(expectedRole) {
   }
 }
 
+const ESCAPE_HTML_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+function esc(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, (caracter) => ESCAPE_HTML_MAP[caracter]);
+}
+
 function formatError(error) {
   if (error.payload && error.payload.errors) {
     return Object.values(error.payload.errors).flat().join('\n');

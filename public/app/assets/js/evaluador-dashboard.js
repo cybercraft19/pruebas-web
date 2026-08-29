@@ -103,7 +103,7 @@
           <div class="test-card__icon ${p.tipo === 'tmt' ? 'tmt' : ''}">${p.tipo === 'tmt' ? Icons.stopwatch : Icons.fileText}</div>
           <span class="badge ${p.estado}">${p.estado}</span>
         </div>
-        <h3>${p.titulo}</h3>
+        <h3>${esc(p.titulo)}</h3>
         <div class="test-card__meta">
           ${p.tipo === 'tmt'
             ? `<span>${Icons.grid} Lienzo interactivo</span>`
@@ -141,13 +141,13 @@
       <tr>
         <td>
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="avatar" style="width:28px;height:28px;font-size:0.7rem">${e.name.charAt(0).toUpperCase()}</div>
-            ${e.name}
+            <div class="avatar" style="width:28px;height:28px;font-size:0.7rem">${esc(e.name.charAt(0).toUpperCase())}</div>
+            ${esc(e.name)}
           </div>
         </td>
-        <td>${e.email}</td>
+        <td>${esc(e.email)}</td>
         <td style="text-align:right">
-          <button type="button" class="icon-btn" style="margin-top:0" title="Eliminar estudiante" data-eliminar="${e.id}" data-nombre="${e.name}">${Icons.trash}</button>
+          <button type="button" class="icon-btn" style="margin-top:0" title="Eliminar estudiante" data-eliminar="${e.id}" data-nombre="${esc(e.name)}">${Icons.trash}</button>
         </td>
       </tr>
     `).join('');

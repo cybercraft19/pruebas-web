@@ -34,7 +34,7 @@
           <div class="test-card__icon ${esTmt ? 'tmt' : ''}">${esTmt ? Icons.stopwatch : Icons.fileText}</div>
           <span class="badge info">${esTmt ? 'TMT' : 'Cuestionario'}</span>
         </div>
-        <h3>${p.titulo}</h3>
+        <h3>${esc(p.titulo)}</h3>
         <div class="test-card__meta">
           <span>${Icons.fileText} ${esTmt ? 'Lienzo interactivo' : `${p.preguntas_count} preguntas`}</span>
           ${p.tiempo_max_minutos ? `<span>${Icons.stopwatch} ${p.tiempo_max_minutos} min</span>` : ''}
@@ -68,7 +68,7 @@
       const destino = i.prueba.tipo === 'tmt' ? 'tmt' : 'prueba';
       return `
       <tr>
-        <td>${i.prueba.titulo}</td>
+        <td>${esc(i.prueba.titulo)}</td>
         <td><span class="badge ${i.estado === 'finalizado' ? 'publicada' : 'borrador'}">${i.estado === 'finalizado' ? 'Finalizado' : 'En progreso'}</span></td>
         <td><a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">${i.estado === 'finalizado' ? 'Ver resultado' : 'Continuar'}</a></td>
       </tr>

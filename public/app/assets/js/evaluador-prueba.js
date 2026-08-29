@@ -85,8 +85,8 @@
 
     document.getElementById('categorias-body').innerHTML = prueba.categorias.map((c) => `
       <div class="categoria-tile">
-        <strong>${c.nombre}</strong>
-        <span class="badge info">${c.tipo_puntuacion}</span>
+        <strong>${esc(c.nombre)}</strong>
+        <span class="badge info">${esc(c.tipo_puntuacion)}</span>
       </div>
     `).join('');
 
@@ -100,11 +100,11 @@
       return `
         <div class="pregunta-block">
           <div class="flex-between" style="align-items:flex-start;gap:12px">
-            <strong>${p.orden}. ${p.texto}</strong>
-            ${categoria ? `<span class="badge info" style="flex-shrink:0">${categoria.nombre}</span>` : ''}
+            <strong>${p.orden}. ${esc(p.texto)}</strong>
+            ${categoria ? `<span class="badge info" style="flex-shrink:0">${esc(categoria.nombre)}</span>` : ''}
           </div>
           <ul class="opciones-preview">
-            ${p.opciones.map((o) => `<li>${o.texto} <span class="peso">${o.peso}</span></li>`).join('')}
+            ${p.opciones.map((o) => `<li>${esc(o.texto)} <span class="peso">${o.peso}</span></li>`).join('')}
           </ul>
         </div>
       `;
@@ -122,8 +122,8 @@
       resultados.forEach((intento) => {
         intento.tmt_resultados.forEach((r) => {
           rows.push([
-            intento.estudiante.name,
-            intento.estudiante.email,
+            esc(intento.estudiante.name),
+            esc(intento.estudiante.email),
             r.parte,
             `${r.tiempo_segundos} s`,
             r.errores,
@@ -139,11 +139,11 @@
       resultados.forEach((intento) => {
         intento.resultados.forEach((r) => {
           rows.push([
-            intento.estudiante.name,
-            intento.estudiante.email,
-            r.categoria,
+            esc(intento.estudiante.name),
+            esc(intento.estudiante.email),
+            esc(r.categoria),
             r.puntaje,
-            r.etiqueta || '—',
+            esc(r.etiqueta || '—'),
             new Date(intento.finalizado_at).toLocaleString(),
           ]);
         });
