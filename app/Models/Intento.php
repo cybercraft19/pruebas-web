@@ -49,4 +49,12 @@ class Intento extends Model
     {
         return $this->hasMany(ResultadoInforme::class);
     }
+
+    /**
+     * @return HasMany<TmtResultado, $this>
+     */
+    public function tmtResultados(): HasMany
+    {
+        return $this->hasMany(TmtResultado::class);
+    }
 }

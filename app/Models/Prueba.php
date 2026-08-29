@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['creado_por', 'titulo', 'instrucciones', 'tiempo_max_minutos', 'estado', 'pdf_referencia_path'])]
+#[Fillable(['creado_por', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos', 'estado', 'pdf_referencia_path'])]
 class Prueba extends Model
 {
     /**
@@ -40,5 +40,13 @@ class Prueba extends Model
     public function intentos(): HasMany
     {
         return $this->hasMany(Intento::class);
+    }
+
+    /**
+     * @return HasMany<TmtNodo, $this>
+     */
+    public function tmtNodos(): HasMany
+    {
+        return $this->hasMany(TmtNodo::class)->orderBy('parte')->orderBy('practica', 'desc')->orderBy('orden');
     }
 }
