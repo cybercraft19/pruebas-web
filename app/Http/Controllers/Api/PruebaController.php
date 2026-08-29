@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\PruebaTemplateExport;
+use App\Exports\ResultadosExport;
 use App\Http\Controllers\Controller;
 use App\Models\Prueba;
 use App\Services\PruebaImportService;
+use App\Services\TmtLayoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PruebaController extends Controller
@@ -25,7 +29,33 @@ class PruebaController extends Controller
     {
         $this->authorizeAcceso($prueba);
 
-        return $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
+        return $prueba->tipo === 'tmt'
+            ? $prueba->load('tmtNodos')
+            : $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
+    }
+
+    public function crearTmt(Request $request, TmtLayoutService $layoutService)
+    {
+        $data = $request->validate([
+            'titulo' => ['required', 'string', 'max:255'],
+            'instrucciones' => ['nullable', 'string'],
+        ]);
+
+        $prueba = DB::transaction(function () use ($data, $layoutService) {
+            $prueba = Prueba::create([
+                'creado_por' => Auth::id(),
+                'tipo' => 'tmt',
+                'titulo' => $data['titulo'],
+                'instrucciones' => $data['instrucciones'] ?? null,
+                'estado' => 'borrador',
+            ]);
+
+            $layoutService->generar($prueba);
+
+            return $prueba;
+        });
+
+        return response()->json($prueba->load('tmtNodos'), 201);
     }
 
     public function plantilla()
@@ -63,17 +93,44 @@ class PruebaController extends Controller
         return $prueba;
     }
 
+    public function archivar(Prueba $prueba)
+    {
+        $this->authorizeAcceso($prueba);
+
+        $prueba->update(['estado' => 'archivada']);
+
+        return $prueba;
+    }
+
     public function publicadas()
     {
         return Prueba::query()
             ->where('estado', 'publicada')
             ->withCount('preguntas')
-            ->get(['id', 'titulo', 'instrucciones', 'tiempo_max_minutos']);
+            ->get(['id', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos']);
     }
 
     public function resultados(Prueba $prueba)
     {
         $this->authorizeAcceso($prueba);
+
+        if ($prueba->tipo === 'tmt') {
+            return $prueba->intentos()
+                ->where('estado', 'finalizado')
+                ->with(['estudiante:id,name,email', 'tmtResultados'])
+                ->get()
+                ->map(fn ($intento) => [
+                    'intento_id' => $intento->id,
+                    'estudiante' => $intento->estudiante->only(['id', 'name', 'email']),
+                    'finalizado_at' => $intento->finalizado_at,
+                    'tmt_resultados' => $intento->tmtResultados->map(fn ($resultado) => [
+                        'parte' => $resultado->parte,
+                        'tiempo_segundos' => $resultado->tiempo_segundos,
+                        'errores' => $resultado->errores,
+                        'completado' => $resultado->completado,
+                    ]),
+                ]);
+        }
 
         return $prueba->intentos()
             ->where('estado', 'finalizado')
@@ -89,6 +146,15 @@ class PruebaController extends Controller
                     'etiqueta' => $resultado->etiqueta_interpretacion,
                 ]),
             ]);
+    }
+
+    public function exportarResultados(Prueba $prueba)
+    {
+        $this->authorizeAcceso($prueba);
+
+        $nombreArchivo = Str::slug($prueba->titulo).'-resultados.xlsx';
+
+        return Excel::download(new ResultadosExport($prueba), $nombreArchivo);
     }
 
     private function authorizeAcceso(Prueba $prueba): void

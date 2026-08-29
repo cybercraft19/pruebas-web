@@ -8,12 +8,15 @@ use App\Models\OpcionRespuesta;
 use App\Models\Pregunta;
 use App\Models\Prueba;
 use App\Models\RespuestaEstudiante;
+use App\Models\TmtResultado;
 use App\Services\ScoringService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class IntentoController extends Controller
 {
+    private const TMT_LIMITES = ['A' => 100, 'B' => 300];
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -30,7 +33,40 @@ class IntentoController extends Controller
             'iniciado_at' => now(),
         ]);
 
-        return response()->json($intento->load('prueba.categorias', 'prueba.preguntas.opciones'), 201);
+        $relaciones = $prueba->tipo === 'tmt'
+            ? ['prueba.tmtNodos']
+            : ['prueba.categorias', 'prueba.preguntas.opciones'];
+
+        return response()->json($intento->load($relaciones), 201);
+    }
+
+    public function registrarTmt(Request $request, Intento $intento)
+    {
+        $this->authorizeEstudiante($intento);
+        abort_if($intento->estado === 'finalizado', 422, 'El intento ya fue finalizado.');
+
+        $prueba = $intento->prueba()->first();
+        abort_unless($prueba->tipo === 'tmt', 422, 'Esta prueba no es de tipo TMT.');
+
+        $data = $request->validate([
+            'parte' => ['required', 'in:A,B'],
+            'tiempo_segundos' => ['required', 'integer', 'min:1'],
+            'errores' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $limite = self::TMT_LIMITES[$data['parte']];
+        $completado = $data['tiempo_segundos'] <= $limite;
+
+        $resultado = TmtResultado::updateOrCreate(
+            ['intento_id' => $intento->id, 'parte' => $data['parte']],
+            [
+                'tiempo_segundos' => $completado ? $data['tiempo_segundos'] : $limite + 1,
+                'errores' => $data['errores'],
+                'completado' => $completado,
+            ]
+        );
+
+        return response()->json($resultado);
     }
 
     public function responder(Request $request, Intento $intento)
@@ -59,7 +95,22 @@ class IntentoController extends Controller
         $this->authorizeEstudiante($intento);
         abort_if($intento->estado === 'finalizado', 422, 'El intento ya fue finalizado.');
 
-        $totalPreguntas = $intento->prueba()->first()->preguntas()->count();
+        $prueba = $intento->prueba()->first();
+
+        if ($prueba->tipo === 'tmt') {
+            $partesRegistradas = $intento->tmtResultados()->pluck('parte');
+            abort_unless(
+                $partesRegistradas->contains('A') && $partesRegistradas->contains('B'),
+                422,
+                'Faltan partes del TMT por completar.'
+            );
+
+            $intento->update(['estado' => 'finalizado', 'finalizado_at' => now()]);
+
+            return response()->json(['intento' => $intento, 'tmt_resultados' => $intento->tmtResultados]);
+        }
+
+        $totalPreguntas = $prueba->preguntas()->count();
         $totalRespondidas = $intento->respuestas()->count();
 
         abort_if(
@@ -79,13 +130,17 @@ class IntentoController extends Controller
     {
         $this->authorizeAcceso($intento);
 
-        return $intento->load(['prueba.categorias', 'prueba.preguntas.opciones', 'respuestas', 'resultados.categoria']);
+        $relaciones = $intento->prueba->tipo === 'tmt'
+            ? ['prueba.tmtNodos', 'tmtResultados']
+            : ['prueba.categorias', 'prueba.preguntas.opciones', 'respuestas', 'resultados.categoria'];
+
+        return $intento->load($relaciones);
     }
 
     public function mios()
     {
         return Intento::where('estudiante_id', Auth::id())
-            ->with('prueba:id,titulo')
+            ->with('prueba:id,titulo,tipo')
             ->latest()
             ->get();
     }
