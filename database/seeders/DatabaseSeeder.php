@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        $evaluador = User::factory()->create([
             'name' => 'Evaluador Demo',
             'email' => 'evaluador@demo.com',
             'password' => bcrypt('password'),
@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'estudiante@demo.com',
             'password' => bcrypt('password'),
             'role' => 'estudiante',
+            'creado_por' => $evaluador->id,
         ]);
 
         $this->call(PruebasReferenciaSeeder::class);

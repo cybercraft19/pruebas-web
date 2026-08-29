@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -77,7 +78,7 @@ class AuthenticationTest extends TestCase
     public function test_evaluador_puede_exportar_estudiantes(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);
-        User::factory()->create(['role' => 'estudiante']);
+        User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id]);
 
         $response = $this->actingAs($evaluador)->get('/api/estudiantes/exportar');
 
@@ -85,10 +86,10 @@ class AuthenticationTest extends TestCase
         $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
 
-    public function test_evaluador_puede_eliminar_estudiante(): void
+    public function test_evaluador_puede_eliminar_su_estudiante(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);
-        $estudiante = User::factory()->create(['role' => 'estudiante']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id]);
 
         $response = $this->actingAs($evaluador)->deleteJson("/api/estudiantes/{$estudiante->id}");
 
@@ -105,6 +106,34 @@ class AuthenticationTest extends TestCase
 
         $response->assertNotFound();
         $this->assertDatabaseHas('users', ['id' => $otroEvaluador->id]);
+    }
+
+    public function test_evaluador_no_ve_ni_puede_eliminar_estudiantes_de_otro_evaluador(): void
+    {
+        $evaluadorA = User::factory()->create(['role' => 'evaluador']);
+        $evaluadorB = User::factory()->create(['role' => 'evaluador']);
+        $estudianteDeB = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluadorB->id]);
+
+        $listado = $this->actingAs($evaluadorA)->getJson('/api/estudiantes');
+        $listado->assertOk();
+        $this->assertFalse(collect($listado->json())->contains('id', $estudianteDeB->id));
+
+        $borrado = $this->actingAs($evaluadorA)->deleteJson("/api/estudiantes/{$estudianteDeB->id}");
+        $borrado->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $estudianteDeB->id]);
+    }
+
+    public function test_evaluador_puede_resetear_password_de_su_estudiante(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id, 'password' => bcrypt('vieja12345')]);
+
+        $response = $this->actingAs($evaluador)->postJson("/api/estudiantes/{$estudiante->id}/reset-password", [
+            'password' => 'nueva12345',
+        ]);
+
+        $response->assertNoContent();
+        $this->assertTrue(Hash::check('nueva12345', $estudiante->fresh()->password));
     }
 
     public function test_estudiante_cannot_manage_estudiantes(): void

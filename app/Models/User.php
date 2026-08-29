@@ -7,12 +7,13 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'creado_por'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -56,5 +57,23 @@ class User extends Authenticatable
     public function intentos(): HasMany
     {
         return $this->hasMany(Intento::class, 'estudiante_id');
+    }
+
+    /**
+     * El evaluador que dio de alta a este estudiante.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creado_por');
+    }
+
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function estudiantesCreados(): HasMany
+    {
+        return $this->hasMany(User::class, 'creado_por');
     }
 }

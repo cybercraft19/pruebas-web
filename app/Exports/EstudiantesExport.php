@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 
 class EstudiantesExport implements FromCollection, WithHeadings, WithTitle
 {
+    public function __construct(private readonly int $evaluadorId) {}
+
     public function title(): string
     {
         return 'Estudiantes';
@@ -24,6 +26,7 @@ class EstudiantesExport implements FromCollection, WithHeadings, WithTitle
     {
         return User::query()
             ->where('role', 'estudiante')
+            ->where('creado_por', $this->evaluadorId)
             ->get(['name', 'email', 'created_at'])
             ->map(fn (User $estudiante) => [
                 $estudiante->name,
