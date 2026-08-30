@@ -1333,6 +1333,7 @@ hr.divider {
 .login-card .brand-mark {
   height: 108px;
   margin-bottom: 12px;
+  justify-content: center;
 }
 
 .login-card h1 {
