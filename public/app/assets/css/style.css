@@ -436,6 +436,14 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   gap: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+a.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .stat-card__icon {
@@ -446,8 +454,8 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: var(--surface-muted);
+  color: var(--text-muted);
 }
 
 .stat-card__icon svg {
@@ -941,14 +949,9 @@ a.test-card:hover h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: var(--surface-muted);
+  color: var(--text-muted);
   flex-shrink: 0;
-}
-
-.test-card__icon.tmt {
-  background: var(--color-accent-light);
-  color: var(--color-accent-dark);
 }
 
 .test-card__icon svg {
