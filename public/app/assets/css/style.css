@@ -169,14 +169,16 @@ h1, h2, h3 {
 
 .sidebar__brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
+  text-align: center;
+  gap: 6px;
+  padding: 22px 20px 18px;
   border-bottom: 1px solid var(--border);
 }
 
 .sidebar__brand .brand-mark {
-  height: 36px;
+  height: 56px;
 }
 
 .sidebar__brand-text strong {
@@ -1316,7 +1318,7 @@ hr.divider {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(160deg, #1e1b4b 0%, #0f172a 60%);
+  background: linear-gradient(160deg, var(--color-primary) 0%, #030f38 60%);
 }
 
 .login-card {
@@ -1329,8 +1331,8 @@ hr.divider {
 }
 
 .login-card .brand-mark {
-  height: 48px;
-  margin-bottom: 16px;
+  height: 108px;
+  margin-bottom: 12px;
 }
 
 .login-card h1 {
