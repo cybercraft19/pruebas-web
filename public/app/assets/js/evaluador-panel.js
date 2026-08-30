@@ -22,6 +22,34 @@
   quickIcons[1].innerHTML = Icons.stopwatch;
   quickIcons[2].innerHTML = Icons.users;
 
+  function emptyState(mensaje) {
+    return `<div class="empty-state">${Icons.inbox}<p>${mensaje}</p></div>`;
+  }
+
+  function renderRecientes(pruebas) {
+    const host = document.getElementById('recientes-list');
+
+    if (pruebas.length === 0) {
+      host.innerHTML = emptyState('Todavía no creaste ninguna prueba.');
+      return;
+    }
+
+    host.innerHTML = pruebas.slice(0, 4).map((p) => {
+      const fecha = new Date(p.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+      return `
+      <div class="recent-item">
+        <div class="test-card__icon ${p.tipo === 'tmt' ? 'tmt' : ''}" style="margin:0">${p.tipo === 'tmt' ? Icons.stopwatch : Icons.fileText}</div>
+        <div style="flex:1;min-width:0">
+          <div class="recent-item__title">${esc(p.titulo)}</div>
+          <div class="recent-item__meta">Creada el ${fecha}</div>
+        </div>
+        <span class="badge ${p.estado}">${p.estado}</span>
+        <a class="link" href="/app/evaluador/prueba.html?id=${p.id}" style="font-size:0.85rem">Ver</a>
+      </div>
+    `;
+    }).join('');
+  }
+
   async function cargarResumen() {
     const [pruebas, estudiantes] = await Promise.all([
       Api.get('/api/pruebas'),
@@ -31,6 +59,7 @@
     document.getElementById('stat-total').textContent = pruebas.length;
     document.getElementById('stat-publicadas').textContent = pruebas.filter((p) => p.estado === 'publicada').length;
     document.getElementById('stat-estudiantes').textContent = estudiantes.length;
+    renderRecientes(pruebas);
   }
 
   cargarResumen();
