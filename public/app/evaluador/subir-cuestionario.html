@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Panel del evaluador — Sistema de Pruebas</title>
+  <title>Subir cuestionario — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
   <link rel="stylesheet" href="/app/assets/css/style.css" />
 </head>
@@ -20,13 +20,13 @@
       </div>
       <nav class="sidebar__nav">
         <div class="nav-section">General</div>
-        <a class="nav-link active" href="/app/evaluador/index.html">
+        <a class="nav-link" href="/app/evaluador/index.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
           Panel
         </a>
 
         <div class="nav-section">Gestión</div>
-        <a class="nav-link" href="/app/evaluador/subir-cuestionario.html">
+        <a class="nav-link active" href="/app/evaluador/subir-cuestionario.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Subir cuestionario
         </a>
@@ -57,72 +57,55 @@
       <header class="main__topbar">
         <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
         <div class="main__topbar-titles">
-          <strong>Panel del evaluador</strong>
-          <span>Gestiona pruebas, estudiantes y resultados</span>
+          <strong>Subir cuestionario</strong>
+          <span>Importar una prueba desde una plantilla Excel</span>
         </div>
       </header>
 
       <div class="main__content">
         <div class="container">
-          <div class="page-header">
-            <div>
-              <h1 class="page-header__greeting">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
-                Buen día
-              </h1>
-              <p>Administra tus pruebas, tus estudiantes y revisa los resultados desde un solo lugar.</p>
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-card__icon"></div>
-              <div>
-                <div class="stat-card__value" id="stat-total">—</div>
-                <div class="stat-card__label">Pruebas creadas</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card__icon"></div>
-              <div>
-                <div class="stat-card__value" id="stat-publicadas">—</div>
-                <div class="stat-card__label">Publicadas</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card__icon"></div>
-              <div>
-                <div class="stat-card__value" id="stat-estudiantes">—</div>
-                <div class="stat-card__label">Estudiantes</div>
-              </div>
-            </div>
-          </div>
-
           <div class="card">
-            <div class="section-title">Accesos rápidos</div>
-            <div class="test-grid">
-              <a class="test-card" href="/app/evaluador/subir-cuestionario.html">
-                <div class="test-card__top">
-                  <div class="test-card__icon"></div>
+            <div class="section-title">Subir una prueba tipo cuestionario</div>
+            <p class="section-subtitle">
+              1) Descarga la plantilla Excel. 2) Complétala con las preguntas, categorías y pesos.
+              3) Súbela aquí (opcionalmente junto al PDF original de referencia).
+            </p>
+            <button class="secondary" id="descargar-plantilla"></button>
+
+            <hr class="divider" />
+
+            <form id="import-form">
+              <div class="form-row">
+                <div>
+                  <label for="archivo">Archivo Excel (.xlsx)</label>
+                  <label class="dropzone" for="archivo" id="dropzone-archivo">
+                    <input type="file" id="archivo" accept=".xlsx,.xls" required />
+                    <div class="dropzone__icon" id="dropzone-archivo-icon"></div>
+                    <div class="dropzone__text">
+                      <strong>Hacé clic o arrastrá el archivo aquí</strong>
+                      <span>.xlsx o .xls</span>
+                    </div>
+                    <div class="dropzone__filename" id="dropzone-archivo-filename"></div>
+                  </label>
                 </div>
-                <h3>Subir cuestionario</h3>
-                <div class="test-card__meta"><span>Importar una prueba desde una plantilla Excel</span></div>
-              </a>
-              <a class="test-card" href="/app/evaluador/crear-tmt.html">
-                <div class="test-card__top">
-                  <div class="test-card__icon tmt"></div>
+                <div>
+                  <label for="pdf_referencia">PDF de referencia (opcional)</label>
+                  <label class="dropzone" for="pdf_referencia" id="dropzone-pdf_referencia">
+                    <input type="file" id="pdf_referencia" accept="application/pdf" />
+                    <div class="dropzone__icon" id="dropzone-pdf_referencia-icon"></div>
+                    <div class="dropzone__text">
+                      <strong>Hacé clic o arrastrá el PDF aquí</strong>
+                      <span>Opcional — hasta 10 MB</span>
+                    </div>
+                    <div class="dropzone__filename" id="dropzone-pdf_referencia-filename"></div>
+                  </label>
                 </div>
-                <h3>Crear TMT</h3>
-                <div class="test-card__meta"><span>Nueva prueba de Trail Making Test</span></div>
-              </a>
-              <a class="test-card" href="/app/evaluador/estudiantes.html">
-                <div class="test-card__top">
-                  <div class="test-card__icon"></div>
-                </div>
-                <h3>Estudiantes</h3>
-                <div class="test-card__meta"><span>Crear cuentas y gestionar accesos</span></div>
-              </a>
-            </div>
+              </div>
+
+              <button type="submit" id="import-submit"></button>
+              <div class="error" id="import-error"></div>
+              <div class="success" id="import-success"></div>
+            </form>
           </div>
         </div>
       </div>
@@ -130,6 +113,6 @@
   </div>
 
   <script src="/app/assets/js/api.js"></script>
-  <script src="/app/assets/js/evaluador-panel.js"></script>
+  <script src="/app/assets/js/evaluador-subir-cuestionario.js"></script>
 </body>
 </html>

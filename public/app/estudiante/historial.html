@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Trail Making Test — Sistema de Pruebas</title>
+  <title>Mi historial — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
   <link rel="stylesheet" href="/app/assets/css/style.css" />
 </head>
@@ -20,11 +20,11 @@
       </div>
       <nav class="sidebar__nav">
         <div class="nav-section">General</div>
-        <a class="nav-link active" href="/app/estudiante/index.html">
+        <a class="nav-link" href="/app/estudiante/index.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
           Pruebas disponibles
         </a>
-        <a class="nav-link" href="/app/estudiante/historial.html">
+        <a class="nav-link active" href="/app/estudiante/historial.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 16 14"/></svg>
           Mi historial
         </a>
@@ -42,32 +42,31 @@
     <div class="main">
       <header class="main__topbar">
         <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú"></button>
-        <a class="link" href="/app/estudiante/index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem" id="volver-link">Volver al panel</a>
+        <div class="main__topbar-titles">
+          <strong>Mi historial</strong>
+          <span>Pruebas que ya presentaste</span>
+        </div>
       </header>
 
       <div class="main__content">
         <div class="container">
-          <div class="card" id="instrucciones-card">
-            <h1 id="titulo" style="font-size:1.3rem">Trail Making Test</h1>
-            <p id="instrucciones" class="muted" style="margin-top:8px"></p>
-          </div>
-
-          <div class="card" id="progreso-card" style="display:none">
-            <div class="flex-between" style="margin-bottom: 6px">
-              <span class="muted" id="paso-label"></span>
-            </div>
-            <div class="progress-track">
-              <div class="progress-fill" id="paso-fill" style="width:0%"></div>
+          <div class="card">
+            <div class="section-title">Mi historial</div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead><tr><th>Prueba</th><th>Estado</th><th></th></tr></thead>
+                <tbody id="historial-body">
+                  <tr class="skeleton-row"><td colspan="3"><div class="skeleton-bar"></div></td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div class="card" id="stage"></div>
         </div>
       </div>
     </div>
   </div>
 
   <script src="/app/assets/js/api.js"></script>
-  <script src="/app/assets/js/estudiante-tmt.js"></script>
+  <script src="/app/assets/js/estudiante-historial.js"></script>
 </body>
 </html>

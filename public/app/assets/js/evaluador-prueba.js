@@ -5,7 +5,7 @@
   initSidebar();
   document.getElementById('user-name').textContent = user.name;
   document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
-  document.getElementById('volver-link').innerHTML = `${Icons.arrowLeft} Volver al panel`;
+  document.getElementById('volver-link').innerHTML = `${Icons.arrowLeft} Volver a mis pruebas`;
 
   const logoutBtn = document.getElementById('logout-btn');
   logoutBtn.innerHTML = Icons.logout;
@@ -16,7 +16,7 @@
 
   const pruebaId = new URLSearchParams(window.location.search).get('id');
   if (!pruebaId) {
-    window.location.href = '/app/evaluador/index.html';
+    window.location.href = '/app/evaluador/mis-pruebas.html';
     return;
   }
 
