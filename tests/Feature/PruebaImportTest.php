@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Exports\PruebaTemplateExport;
 use App\Imports\PruebaTemplateImport;
+use App\Models\CategoriaEvaluacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -57,6 +58,32 @@ class PruebaImportTest extends TestCase
         $this->assertDatabaseHas('categorias_evaluacion', ['nombre' => 'Manifestaciones Cognitivas', 'tipo_puntuacion' => 'PROMEDIO']);
         $this->assertDatabaseHas('preguntas', ['texto' => 'Estoy muy preocupado por los exámenes', 'orden' => 1]);
         $this->assertDatabaseCount('opciones_respuesta', 5);
+    }
+
+    public function test_import_creates_interpretaciones_from_template(): void
+    {
+        Storage::fake('local');
+
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $file = $this->buildTemplateUploadFile();
+
+        $response = $this->actingAs($evaluador)->post('/api/pruebas/importar', [
+            'archivo' => $file,
+        ]);
+
+        $response->assertCreated();
+
+        $categoria = CategoriaEvaluacion::where('nombre', 'Manifestaciones Cognitivas')->firstOrFail();
+
+        $this->assertDatabaseHas('interpretaciones_categoria', [
+            'categoria_evaluacion_id' => $categoria->id,
+            'etiqueta' => 'Bajo',
+            'recomendacion' => 'Tu nivel está dentro de un rango saludable.',
+        ]);
+        $this->assertDatabaseHas('interpretaciones_categoria', [
+            'categoria_evaluacion_id' => $categoria->id,
+            'etiqueta' => 'Alto',
+        ]);
     }
 
     public function test_import_fails_with_unknown_category_reference(): void
@@ -114,7 +141,7 @@ class PruebaImportTest extends TestCase
 
             public function sheets(): array
             {
-                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones'];
+                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
 
                 return array_map(
                     fn ($rows, $i) => new class($rows, $titles[$i]) implements FromArray, WithHeadings, WithTitle

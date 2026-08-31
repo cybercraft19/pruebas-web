@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Exports\Sheets\CategoriasSheetExport;
+use App\Exports\Sheets\InterpretacionesSheetExport;
 use App\Exports\Sheets\OpcionesSheetExport;
 use App\Exports\Sheets\PreguntasSheetExport;
 use App\Exports\Sheets\PruebaSheetExport;
@@ -18,6 +19,7 @@ class PruebaTemplateExport implements Export, WithMultipleSheets
             new CategoriasSheetExport,
             new PreguntasSheetExport,
             new OpcionesSheetExport,
+            new InterpretacionesSheetExport,
         ];
     }
 }

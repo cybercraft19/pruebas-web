@@ -129,7 +129,7 @@ class PruebaEdicionTest extends TestCase
 
             public function sheets(): array
             {
-                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones'];
+                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
 
                 return array_map(
                     fn ($rows, $i) => new class($rows, $titles[$i]) implements FromArray, WithHeadings, WithTitle
