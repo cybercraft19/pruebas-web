@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Exports\Sheets\CategoriasSheetExport;
+use App\Exports\Sheets\InstruccionesSheetExport;
 use App\Exports\Sheets\InterpretacionesSheetExport;
 use App\Exports\Sheets\OpcionesSheetExport;
 use App\Exports\Sheets\PreguntasSheetExport;
@@ -15,6 +16,7 @@ class PruebaTemplateExport implements Export, WithMultipleSheets
     public function sheets(): array
     {
         return [
+            new InstruccionesSheetExport,
             new PruebaSheetExport,
             new CategoriasSheetExport,
             new PreguntasSheetExport,

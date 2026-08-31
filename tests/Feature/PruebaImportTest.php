@@ -92,7 +92,7 @@ class PruebaImportTest extends TestCase
 
         $evaluador = User::factory()->create(['role' => 'evaluador']);
         $file = $this->buildTemplateUploadFile(function (array &$sheets) {
-            $sheets[2][0]['categoria'] = 'Categoria Inexistente';
+            $sheets[3][0]['categoria'] = 'Categoria Inexistente';
         });
 
         $response = $this->actingAs($evaluador)->post('/api/pruebas/importar', [
@@ -141,7 +141,7 @@ class PruebaImportTest extends TestCase
 
             public function sheets(): array
             {
-                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
+                $titles = ['Instrucciones', 'Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
 
                 return array_map(
                     fn ($rows, $i) => new class($rows, $titles[$i]) implements FromArray, WithHeadings, WithTitle

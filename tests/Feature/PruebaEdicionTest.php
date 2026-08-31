@@ -61,7 +61,7 @@ class PruebaEdicionTest extends TestCase
         CategoriaEvaluacion::create(['prueba_id' => $prueba->id, 'nombre' => 'Vieja categoria', 'tipo_puntuacion' => 'PROMEDIO', 'orden' => 1]);
 
         $file = $this->buildTemplateUploadFile(function (array &$sheets) {
-            $sheets[0][0]['titulo'] = 'Prueba Reemplazada';
+            $sheets[1][0]['titulo'] = 'Prueba Reemplazada';
         });
 
         $response = $this->actingAs($evaluador)->post("/api/pruebas/{$prueba->id}/reimportar", [
@@ -129,7 +129,7 @@ class PruebaEdicionTest extends TestCase
 
             public function sheets(): array
             {
-                $titles = ['Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
+                $titles = ['Instrucciones', 'Prueba', 'Categorias', 'Preguntas', 'Opciones', 'Interpretaciones'];
 
                 return array_map(
                     fn ($rows, $i) => new class($rows, $titles[$i]) implements FromArray, WithHeadings, WithTitle

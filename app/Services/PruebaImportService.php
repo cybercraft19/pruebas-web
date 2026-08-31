@@ -67,17 +67,20 @@ class PruebaImportService
     }
 
     /**
+     * La hoja 0 ("Instrucciones") es solo texto de ayuda para quien completa
+     * la plantilla y no se lee acá. Los datos empiezan en la hoja 1.
+     *
      * @return array{0: array<string, mixed>, 1: array<int, array<string, mixed>>, 2: array<int, array<string, mixed>>, 3: array<int, array<string, mixed>>, 4: array<int, array<string, mixed>>}
      */
     private function leerYValidar(string $filePath): array
     {
         $sheets = Excel::toArray(new PruebaTemplateImport, $filePath);
 
-        $pruebaRows = $sheets[0] ?? [];
-        $categoriaRows = array_values(array_filter($sheets[1] ?? [], fn ($row) => ! empty(array_filter($row))));
-        $preguntaRows = array_values(array_filter($sheets[2] ?? [], fn ($row) => ! empty(array_filter($row))));
-        $opcionRows = array_values(array_filter($sheets[3] ?? [], fn ($row) => ! empty(array_filter($row))));
-        $interpretacionRows = array_values(array_filter($sheets[4] ?? [], fn ($row) => ! empty(array_filter($row))));
+        $pruebaRows = $sheets[1] ?? [];
+        $categoriaRows = array_values(array_filter($sheets[2] ?? [], fn ($row) => ! empty(array_filter($row))));
+        $preguntaRows = array_values(array_filter($sheets[3] ?? [], fn ($row) => ! empty(array_filter($row))));
+        $opcionRows = array_values(array_filter($sheets[4] ?? [], fn ($row) => ! empty(array_filter($row))));
+        $interpretacionRows = array_values(array_filter($sheets[5] ?? [], fn ($row) => ! empty(array_filter($row))));
 
         $errores = $this->validar($pruebaRows, $categoriaRows, $preguntaRows, $opcionRows, $interpretacionRows);
 
