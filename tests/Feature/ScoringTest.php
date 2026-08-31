@@ -93,6 +93,41 @@ class ScoringTest extends TestCase
         $this->assertEquals(1, $verbalResultado['puntaje']);
     }
 
+    /**
+     * Test tipo VAK (estilos de aprendizaje): la pregunta no tiene categoría
+     * propia, cada opción sí — la respuesta elegida decide a qué canal suma.
+     */
+    public function test_finalizar_suma_por_categoria_de_la_opcion_en_preguntas_compartidas(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante']);
+
+        $prueba = Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'VAK', 'estado' => 'publicada']);
+
+        $visual = CategoriaEvaluacion::create(['prueba_id' => $prueba->id, 'nombre' => 'Visual', 'tipo_puntuacion' => 'CONTEO', 'orden' => 1]);
+        $auditivo = CategoriaEvaluacion::create(['prueba_id' => $prueba->id, 'nombre' => 'Auditivo', 'tipo_puntuacion' => 'CONTEO', 'orden' => 2]);
+        $cinestesico = CategoriaEvaluacion::create(['prueba_id' => $prueba->id, 'nombre' => 'Cinestésico', 'tipo_puntuacion' => 'CONTEO', 'orden' => 3]);
+
+        $pregunta = Pregunta::create(['prueba_id' => $prueba->id, 'categoria_evaluacion_id' => null, 'texto' => '¿Qué prefieres?', 'tipo' => 'opcion_multiple', 'orden' => 1]);
+        $opVisual = OpcionRespuesta::create(['pregunta_id' => $pregunta->id, 'categoria_evaluacion_id' => $visual->id, 'texto' => 'Ver', 'peso' => 1, 'orden' => 1]);
+        OpcionRespuesta::create(['pregunta_id' => $pregunta->id, 'categoria_evaluacion_id' => $auditivo->id, 'texto' => 'Oír', 'peso' => 1, 'orden' => 2]);
+        OpcionRespuesta::create(['pregunta_id' => $pregunta->id, 'categoria_evaluacion_id' => $cinestesico->id, 'texto' => 'Tocar', 'peso' => 1, 'orden' => 3]);
+
+        $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id');
+
+        $this->actingAs($estudiante)
+            ->postJson("/api/intentos/{$intentoId}/respuestas", ['pregunta_id' => $pregunta->id, 'opcion_id' => $opVisual->id])
+            ->assertOk();
+
+        $response = $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar");
+        $response->assertOk();
+        $resultados = collect($response->json('resultados'));
+
+        $this->assertEquals(1, $resultados->firstWhere('categoria_evaluacion_id', $visual->id)['puntaje']);
+        $this->assertEquals(0, $resultados->firstWhere('categoria_evaluacion_id', $auditivo->id)['puntaje']);
+        $this->assertEquals(0, $resultados->firstWhere('categoria_evaluacion_id', $cinestesico->id)['puntaje']);
+    }
+
     public function test_finalizar_falla_si_faltan_respuestas(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);
