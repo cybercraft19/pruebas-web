@@ -38,8 +38,22 @@
       .sort((a, b) => a.orden - b.orden);
   }
 
-  function mostrarResultadosFinales(tmtResultados) {
+  function mostrarResultadosFinales(tmtResultados, firmadoAt) {
     progresoCard.style.display = 'none';
+
+    if (!firmadoAt) {
+      stage.innerHTML = `
+        <div class="resultado-celebracion">
+          <div class="resultado-celebracion__confetti" id="confetti-host"></div>
+          <div class="resultado-celebracion__icon">${Icons.award}</div>
+          <h2>¡Trail Making Test completado!</h2>
+          <p class="muted">Tu evaluador revisará tus resultados y te avisaremos cuando estén disponibles.</p>
+        </div>
+      `;
+      lanzarConfeti(document.getElementById('confetti-host'));
+      return;
+    }
+
     stage.innerHTML = `
       <div class="resultado-celebracion">
         <div class="resultado-celebracion__confetti" id="confetti-host"></div>
@@ -66,6 +80,23 @@
       </div>
     `;
     lanzarConfeti(document.getElementById('confetti-host'));
+  }
+
+  function mostrarErrorGuardado(mensaje, reintentar) {
+    const contenedor = document.createElement('div');
+    contenedor.className = 'error';
+    contenedor.style.marginTop = '12px';
+    contenedor.innerHTML = `<span>${esc(mensaje)}</span>`;
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'secondary small';
+    boton.textContent = 'Reintentar';
+    boton.addEventListener('click', () => {
+      contenedor.remove();
+      reintentar();
+    });
+    contenedor.appendChild(boton);
+    stage.appendChild(contenedor);
   }
 
   function mostrarIntro({ titulo, descripcion, limite, onComenzar }) {
@@ -287,7 +318,7 @@
     instruccionesEl.textContent = prueba.instrucciones || '';
 
     if (intento.estado === 'finalizado') {
-      mostrarResultadosFinales(intento.tmt_resultados);
+      mostrarResultadosFinales(intento.tmt_resultados, intento.firmado_at);
       return;
     }
 
@@ -325,8 +356,12 @@
     async function siguientePaso() {
       if (pasoActual >= pasos.length) {
         progresoCard.style.display = 'none';
-        const resultado = await Api.post(`/api/intentos/${intentoId}/finalizar`);
-        mostrarResultadosFinales(resultado.tmt_resultados);
+        try {
+          const resultado = await Api.post(`/api/intentos/${intentoId}/finalizar`);
+          mostrarResultadosFinales(resultado.tmt_resultados, null);
+        } catch (err) {
+          mostrarErrorGuardado('No se pudo guardar tu resultado final. Revisá tu conexión e intentá de nuevo.', siguientePaso);
+        }
         return;
       }
 
@@ -343,12 +378,19 @@
             nodos,
             timed: !paso.practica,
             limite: LIMITES[paso.parte],
-            onCompletar: async ({ tiempo_segundos, errores }) => {
-              if (!paso.practica) {
-                await Api.post(`/api/intentos/${intentoId}/tmt`, { parte: paso.parte, tiempo_segundos, errores });
-              }
-              pasoActual += 1;
-              setTimeout(siguientePaso, paso.practica ? 400 : 1000);
+            onCompletar: ({ tiempo_segundos, errores }) => {
+              const avanzar = async () => {
+                try {
+                  if (!paso.practica) {
+                    await Api.post(`/api/intentos/${intentoId}/tmt`, { parte: paso.parte, tiempo_segundos, errores });
+                  }
+                  pasoActual += 1;
+                  setTimeout(siguientePaso, paso.practica ? 400 : 1000);
+                } catch (err) {
+                  mostrarErrorGuardado('No se pudo guardar tu resultado de esta parte. Revisá tu conexión e intentá de nuevo.', avanzar);
+                }
+              };
+              avanzar();
             },
           });
         },

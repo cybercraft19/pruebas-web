@@ -25,17 +25,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/estudiantes/{estudiante}', [EstudianteController::class, 'destroy']);
         Route::post('/estudiantes/{estudiante}/reset-password', [EstudianteController::class, 'resetPassword']);
 
-        Route::get('/pruebas/plantilla', [PruebaController::class, 'plantilla']);
-        Route::post('/pruebas/importar', [PruebaController::class, 'importar']);
-        Route::post('/pruebas/tmt', [PruebaController::class, 'crearTmt']);
         Route::get('/pruebas', [PruebaController::class, 'index']);
         Route::get('/pruebas/{prueba}', [PruebaController::class, 'show']);
         Route::put('/pruebas/{prueba}', [PruebaController::class, 'update']);
-        Route::post('/pruebas/{prueba}/reimportar', [PruebaController::class, 'reimportar']);
         Route::post('/pruebas/{prueba}/publicar', [PruebaController::class, 'publicar']);
         Route::post('/pruebas/{prueba}/archivar', [PruebaController::class, 'archivar']);
         Route::get('/pruebas/{prueba}/resultados', [PruebaController::class, 'resultados']);
         Route::get('/pruebas/{prueba}/resultados/exportar', [PruebaController::class, 'exportarResultados']);
+        Route::post('/intentos/{intento}/firmar', [IntentoController::class, 'firmar']);
     });
 
     Route::middleware('role:estudiante')->group(function () {

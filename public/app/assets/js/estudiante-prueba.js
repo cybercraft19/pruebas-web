@@ -35,6 +35,20 @@
     preguntasCard.style.display = 'none';
     const card = document.getElementById('resultados-card');
     card.style.display = 'block';
+
+    if (!intento.firmado_at) {
+      card.innerHTML = `
+        <div class="resultado-celebracion">
+          <div class="resultado-celebracion__confetti" id="confetti-host"></div>
+          <div class="resultado-celebracion__icon">${Icons.award}</div>
+          <h2>¡Prueba completada!</h2>
+          <p class="muted">Tu evaluador revisará tus resultados y te avisaremos cuando estén disponibles.</p>
+        </div>
+      `;
+      lanzarConfeti(document.getElementById('confetti-host'));
+      return;
+    }
+
     card.innerHTML = `
       <div class="resultado-celebracion">
         <div class="resultado-celebracion__confetti" id="confetti-host"></div>
@@ -148,15 +162,23 @@
 
       quizBody.querySelectorAll('[data-opcion]').forEach((el) => {
         el.addEventListener('click', async () => {
+          const errorBox = document.getElementById('finalizar-error');
           const opcionId = Number(el.dataset.opcion);
-          await Api.post(`/api/intentos/${intentoId}/respuestas`, { pregunta_id: p.id, opcion_id: opcionId });
-          respuestasPorPregunta[p.id] = opcionId;
-          actualizarProgreso();
+          errorBox.textContent = '';
+          el.disabled = true;
+          try {
+            await Api.post(`/api/intentos/${intentoId}/respuestas`, { pregunta_id: p.id, opcion_id: opcionId });
+            respuestasPorPregunta[p.id] = opcionId;
+            actualizarProgreso();
 
-          if (!esUltima) {
-            setTimeout(() => { indice += 1; render(); }, 250);
-          } else {
-            render();
+            if (!esUltima) {
+              setTimeout(() => { indice += 1; render(); }, 250);
+            } else {
+              render();
+            }
+          } catch (err) {
+            el.disabled = false;
+            errorBox.textContent = formatError(err);
           }
         });
       });

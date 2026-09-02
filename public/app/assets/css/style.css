@@ -1161,14 +1161,17 @@ a.test-card:hover h3 {
   height: 28px;
 }
 
-.tf-btn--true:hover,
+.tf-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
 .tf-btn--true.selected {
   border-color: var(--color-success);
   background: var(--color-success-bg);
   color: var(--color-success-text);
 }
 
-.tf-btn--false:hover,
 .tf-btn--false.selected {
   border-color: var(--color-danger);
   background: var(--color-danger-bg);

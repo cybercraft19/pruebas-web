@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exports\PruebaTemplateExport;
 use App\Exports\ResultadosExport;
 use App\Http\Controllers\Controller;
 use App\Models\Prueba;
-use App\Services\PruebaImportService;
-use App\Services\TmtLayoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -34,56 +30,6 @@ class PruebaController extends Controller
             : $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
     }
 
-    public function crearTmt(Request $request, TmtLayoutService $layoutService)
-    {
-        $data = $request->validate([
-            'titulo' => ['required', 'string', 'max:255'],
-            'instrucciones' => ['nullable', 'string'],
-        ]);
-
-        $prueba = DB::transaction(function () use ($data, $layoutService) {
-            $prueba = Prueba::create([
-                'creado_por' => Auth::id(),
-                'tipo' => 'tmt',
-                'titulo' => $data['titulo'],
-                'instrucciones' => $data['instrucciones'] ?? null,
-                'estado' => 'borrador',
-            ]);
-
-            $layoutService->generar($prueba);
-
-            return $prueba;
-        });
-
-        return response()->json($prueba->load('tmtNodos'), 201);
-    }
-
-    public function plantilla()
-    {
-        return Excel::download(new PruebaTemplateExport, 'plantilla-prueba.xlsx');
-    }
-
-    public function importar(Request $request, PruebaImportService $importService)
-    {
-        $data = $request->validate([
-            'archivo' => ['required', 'file', 'mimes:xlsx,xls'],
-            'pdf_referencia' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
-
-        $pdfPath = null;
-        if ($request->hasFile('pdf_referencia')) {
-            $pdfPath = $request->file('pdf_referencia')->store('pruebas-referencia', 'local');
-        }
-
-        $prueba = $importService->importar(
-            $data['archivo']->getRealPath(),
-            Auth::id(),
-            $pdfPath,
-        );
-
-        return response()->json($prueba, 201);
-    }
-
     public function update(Request $request, Prueba $prueba)
     {
         $this->authorizeAcceso($prueba);
@@ -96,31 +42,6 @@ class PruebaController extends Controller
         $prueba->update($data);
 
         return $prueba;
-    }
-
-    public function reimportar(Request $request, Prueba $prueba, PruebaImportService $importService)
-    {
-        $this->authorizeAcceso($prueba);
-        abort_unless($prueba->tipo === 'cuestionario', 422, 'Solo las pruebas tipo cuestionario admiten reemplazar su contenido.');
-        abort_unless($prueba->estado === 'borrador', 422, 'Solo se puede reemplazar el contenido de una prueba en borrador.');
-        abort_if($prueba->intentos()->exists(), 422, 'No se puede reemplazar el contenido: ya hay intentos de estudiantes sobre esta prueba.');
-
-        $data = $request->validate([
-            'archivo' => ['required', 'file', 'mimes:xlsx,xls'],
-            'pdf_referencia' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
-
-        $pdfPath = $request->hasFile('pdf_referencia')
-            ? $request->file('pdf_referencia')->store('pruebas-referencia', 'local')
-            : null;
-
-        $prueba = $importService->reemplazar(
-            $prueba,
-            $data['archivo']->getRealPath(),
-            $pdfPath,
-        );
-
-        return response()->json($prueba);
     }
 
     public function publicar(Prueba $prueba)
@@ -146,7 +67,15 @@ class PruebaController extends Controller
         return Prueba::query()
             ->where('estado', 'publicada')
             ->withCount('preguntas')
-            ->get(['id', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos']);
+            ->with(['intentos' => fn ($query) => $query->where('estudiante_id', Auth::id())])
+            ->get(['id', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos'])
+            ->map(function (Prueba $prueba) {
+                $intento = $prueba->intentos->first();
+                $prueba->unsetRelation('intentos');
+                $prueba->mi_intento = $intento ? ['id' => $intento->id, 'estado' => $intento->estado] : null;
+
+                return $prueba;
+            });
     }
 
     public function resultados(Prueba $prueba)
@@ -162,6 +91,8 @@ class PruebaController extends Controller
                     'intento_id' => $intento->id,
                     'estudiante' => $intento->estudiante->only(['id', 'name', 'email']),
                     'finalizado_at' => $intento->finalizado_at,
+                    'firmado' => $intento->firmado_at !== null,
+                    'firmado_at' => $intento->firmado_at,
                     'tmt_resultados' => $intento->tmtResultados->map(fn ($resultado) => [
                         'parte' => $resultado->parte,
                         'tiempo_segundos' => $resultado->tiempo_segundos,
@@ -179,6 +110,8 @@ class PruebaController extends Controller
                 'intento_id' => $intento->id,
                 'estudiante' => $intento->estudiante->only(['id', 'name', 'email']),
                 'finalizado_at' => $intento->finalizado_at,
+                'firmado' => $intento->firmado_at !== null,
+                'firmado_at' => $intento->firmado_at,
                 'resultados' => $intento->resultados->map(fn ($resultado) => [
                     'categoria' => $resultado->categoria->nombre,
                     'puntaje' => $resultado->puntaje,

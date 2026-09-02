@@ -28,6 +28,11 @@
 
     grid.innerHTML = pruebas.map((p) => {
       const esTmt = p.tipo === 'tmt';
+      const yaFinalizada = p.mi_intento && p.mi_intento.estado === 'finalizado';
+      const enProgreso = p.mi_intento && p.mi_intento.estado === 'en_progreso';
+      const boton = yaFinalizada
+        ? `<button class="block secondary" disabled>${Icons.checkCircle} Ya realizada</button>`
+        : `<button class="block" data-prueba-id="${p.id}" data-tipo="${p.tipo}">${Icons.play} ${enProgreso ? 'Continuar' : 'Iniciar'}</button>`;
       return `
       <div class="test-card">
         <div class="test-card__top">
@@ -39,18 +44,25 @@
           <span>${Icons.fileText} ${esTmt ? 'Lienzo interactivo' : `${p.preguntas_count} preguntas`}</span>
           ${p.tiempo_max_minutos ? `<span>${Icons.stopwatch} ${p.tiempo_max_minutos} min</span>` : ''}
         </div>
-        <button class="block" data-prueba-id="${p.id}" data-tipo="${p.tipo}">${Icons.play} Iniciar</button>
+        ${boton}
       </div>
     `;
     }).join('');
 
     grid.querySelectorAll('button[data-prueba-id]').forEach((btn) => {
       btn.addEventListener('click', async () => {
+        const original = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> Iniciando…';
-        const intento = await Api.post('/api/intentos', { prueba_id: Number(btn.dataset.pruebaId) });
-        const destino = btn.dataset.tipo === 'tmt' ? 'tmt' : 'prueba';
-        window.location.href = `/app/estudiante/${destino}.html?intento=${intento.id}`;
+        btn.innerHTML = '<span class="spinner"></span> Cargando…';
+        try {
+          const intento = await Api.post('/api/intentos', { prueba_id: Number(btn.dataset.pruebaId) });
+          const destino = btn.dataset.tipo === 'tmt' ? 'tmt' : 'prueba';
+          window.location.href = `/app/estudiante/${destino}.html?intento=${intento.id}`;
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = original;
+          alert(formatError(err));
+        }
       });
     });
   }

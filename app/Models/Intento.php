@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['prueba_id', 'estudiante_id', 'estado', 'iniciado_at', 'finalizado_at'])]
+#[Fillable(['prueba_id', 'estudiante_id', 'estado', 'iniciado_at', 'finalizado_at', 'firmado_at', 'firmado_por'])]
 class Intento extends Model
 {
     protected function casts(): array
@@ -15,6 +15,7 @@ class Intento extends Model
         return [
             'iniciado_at' => 'datetime',
             'finalizado_at' => 'datetime',
+            'firmado_at' => 'datetime',
         ];
     }
 
@@ -56,5 +57,15 @@ class Intento extends Model
     public function tmtResultados(): HasMany
     {
         return $this->hasMany(TmtResultado::class);
+    }
+
+    /**
+     * El evaluador que firmó y publicó este resultado.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function firmante(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'firmado_por');
     }
 }

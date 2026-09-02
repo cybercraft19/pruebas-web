@@ -10,6 +10,7 @@ use App\Models\Prueba;
 use App\Models\RespuestaEstudiante;
 use App\Models\TmtResultado;
 use App\Services\ScoringService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,18 +27,45 @@ class IntentoController extends Controller
         $prueba = Prueba::findOrFail($data['prueba_id']);
         abort_unless($prueba->estado === 'publicada', 422, 'La prueba no está publicada.');
 
-        $intento = Intento::create([
-            'prueba_id' => $prueba->id,
-            'estudiante_id' => Auth::id(),
-            'estado' => 'en_progreso',
-            'iniciado_at' => now(),
-        ]);
+        $existente = Intento::where('prueba_id', $prueba->id)
+            ->where('estudiante_id', Auth::id())
+            ->first();
+
+        abort_if($existente && $existente->estado === 'finalizado', 422, 'Ya presentaste esta prueba. No se puede repetir.');
+
+        $creado = false;
+
+        if ($existente) {
+            $intento = $existente;
+        } else {
+            try {
+                $intento = Intento::create([
+                    'prueba_id' => $prueba->id,
+                    'estudiante_id' => Auth::id(),
+                    'estado' => 'en_progreso',
+                    'iniciado_at' => now(),
+                ]);
+                $creado = true;
+            } catch (QueryException $e) {
+                // Dos peticiones simultáneas del mismo estudiante: la otra ganó la carrera
+                // y el índice único (prueba_id, estudiante_id) rechazó esta segunda inserción.
+                if ((string) $e->getCode() !== '23000') {
+                    throw $e;
+                }
+
+                $intento = Intento::where('prueba_id', $prueba->id)
+                    ->where('estudiante_id', Auth::id())
+                    ->firstOrFail();
+
+                abort_if($intento->estado === 'finalizado', 422, 'Ya presentaste esta prueba. No se puede repetir.');
+            }
+        }
 
         $relaciones = $prueba->tipo === 'tmt'
             ? ['prueba.tmtNodos']
             : ['prueba.categorias', 'prueba.preguntas.opciones'];
 
-        return response()->json($intento->load($relaciones), 201);
+        return response()->json($intento->load($relaciones), $creado ? 201 : 200);
     }
 
     public function registrarTmt(Request $request, Intento $intento)
@@ -145,9 +173,24 @@ class IntentoController extends Controller
             ->get();
     }
 
+    public function firmar(Intento $intento)
+    {
+        $this->authorizeEvaluador($intento);
+        abort_unless($intento->estado === 'finalizado', 422, 'El intento todavía no está finalizado.');
+
+        $intento->update(['firmado_at' => now(), 'firmado_por' => Auth::id()]);
+
+        return $intento->fresh();
+    }
+
     private function authorizeEstudiante(Intento $intento): void
     {
         abort_unless($intento->estudiante_id === Auth::id(), 403);
+    }
+
+    private function authorizeEvaluador(Intento $intento): void
+    {
+        abort_unless($intento->prueba->creado_por === Auth::id(), 403);
     }
 
     private function authorizeAcceso(Intento $intento): void

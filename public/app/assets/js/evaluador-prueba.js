@@ -64,39 +64,16 @@
     }
   });
 
-  initDropzone('reimportar-archivo', Icons.fileText);
-
-  const reimportarForm = document.getElementById('reimportar-form');
-  document.getElementById('reimportar-submit').innerHTML = `${Icons.plus} Reemplazar contenido`;
-
-  reimportarForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById('reimportar-error');
-    const successBox = document.getElementById('reimportar-success');
-    const submitBtn = document.getElementById('reimportar-submit');
-    errorBox.textContent = '';
-    successBox.textContent = '';
-
-    const formData = new FormData();
-    formData.append('archivo', document.getElementById('reimportar-archivo').files[0]);
-
-    submitBtn.disabled = true;
+  document.getElementById('publicar-btn').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
     try {
-      await Api.postForm(`/api/pruebas/${pruebaId}/reimportar`, formData);
-      successBox.textContent = 'Contenido reemplazado correctamente.';
-      reimportarForm.reset();
-      resetDropzone('reimportar-archivo');
+      await Api.post(`/api/pruebas/${pruebaId}/publicar`);
       cargar();
     } catch (err) {
-      errorBox.textContent = formatError(err);
-    } finally {
-      submitBtn.disabled = false;
+      btn.disabled = false;
+      alert(formatError(err));
     }
-  });
-
-  document.getElementById('publicar-btn').addEventListener('click', async () => {
-    await Api.post(`/api/pruebas/${pruebaId}/publicar`);
-    cargar();
   });
 
   let tipoPrueba = 'cuestionario';
@@ -109,9 +86,6 @@
     document.getElementById('instrucciones').textContent = prueba.instrucciones || '';
     document.getElementById('editar-titulo').value = prueba.titulo;
     document.getElementById('editar-instrucciones').value = prueba.instrucciones || '';
-
-    document.getElementById('reemplazar-card').style.display =
-      tipoPrueba === 'cuestionario' && prueba.estado === 'borrador' ? 'block' : 'none';
 
     const badge = document.getElementById('estado-badge');
     badge.textContent = prueba.estado;
@@ -190,9 +164,13 @@
     const resultados = await Api.get(`/api/pruebas/${pruebaId}/resultados`);
     const rows = [];
 
+    const firmaCelda = (intento) => intento.firmado
+      ? '<span class="badge completado">Firmado</span>'
+      : `<button type="button" class="secondary small" data-firmar="${intento.intento_id}">Firmar y publicar</button>`;
+
     if (tipoPrueba === 'tmt') {
       document.getElementById('resultados-head').innerHTML =
-        '<tr><th>Estudiante</th><th>Correo</th><th>Parte</th><th>Tiempo</th><th>Errores</th><th>Estado</th><th>Finalizado</th></tr>';
+        '<tr><th>Estudiante</th><th>Correo</th><th>Parte</th><th>Tiempo</th><th>Errores</th><th>Estado</th><th>Finalizado</th><th>Resultado</th></tr>';
 
       resultados.forEach((intento) => {
         intento.tmt_resultados.forEach((r) => {
@@ -204,12 +182,13 @@
             r.errores,
             `<span class="badge ${r.completado ? 'completado' : 'no-superada'}">${r.completado ? 'Completada' : 'No superada'}</span>`,
             new Date(intento.finalizado_at).toLocaleString(),
+            firmaCelda(intento),
           ]);
         });
       });
     } else {
       document.getElementById('resultados-head').innerHTML =
-        '<tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Recomendación</th><th>Finalizado</th></tr>';
+        '<tr><th>Estudiante</th><th>Correo</th><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Recomendación</th><th>Finalizado</th><th>Resultado</th></tr>';
 
       resultados.forEach((intento) => {
         intento.resultados.forEach((r) => {
@@ -221,6 +200,7 @@
             esc(r.etiqueta || '—'),
             esc(r.recomendacion || '—'),
             new Date(intento.finalizado_at).toLocaleString(),
+            firmaCelda(intento),
           ]);
         });
       });
@@ -231,6 +211,19 @@
       language: { emptyTable: 'Aún no hay resultados de estudiantes.' },
     });
   }
+
+  $('#resultados-table').on('click', '[data-firmar]', async (e) => {
+    const boton = e.currentTarget;
+    boton.disabled = true;
+    try {
+      await Api.post(`/api/intentos/${boton.dataset.firmar}/firmar`);
+      $('#resultados-table').DataTable().destroy();
+      cargarResultados();
+    } catch (err) {
+      boton.disabled = false;
+      alert(formatError(err));
+    }
+  });
 
   cargar().then(cargarResultados);
 })();

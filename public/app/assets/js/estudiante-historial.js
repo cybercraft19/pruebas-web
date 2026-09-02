@@ -28,11 +28,17 @@
 
     body.innerHTML = intentos.map((i) => {
       const destino = i.prueba.tipo === 'tmt' ? 'tmt' : 'prueba';
+      let accion = `<a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">Continuar</a>`;
+      if (i.estado === 'finalizado') {
+        accion = i.firmado_at
+          ? `<a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">Ver resultado</a>`
+          : '<span class="muted" style="font-size:0.85rem">En revisión</span>';
+      }
       return `
       <tr>
         <td>${esc(i.prueba.titulo)}</td>
         <td><span class="badge ${i.estado === 'finalizado' ? 'publicada' : 'borrador'}">${i.estado === 'finalizado' ? 'Finalizado' : 'En progreso'}</span></td>
-        <td><a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">${i.estado === 'finalizado' ? 'Ver resultado' : 'Continuar'}</a></td>
+        <td>${accion}</td>
       </tr>
     `;
     }).join('');

@@ -13,8 +13,6 @@
     window.location.href = '/app/login.html';
   });
 
-  document.getElementById('nueva-prueba-link').innerHTML = `${Icons.plus} Nueva prueba`;
-
   function emptyState(mensaje) {
     return `<div class="empty-state" style="grid-column:1/-1">${Icons.inbox}<p>${mensaje}</p></div>`;
   }
@@ -24,7 +22,7 @@
     const grid = document.getElementById('pruebas-grid');
 
     if (pruebas.length === 0) {
-      grid.innerHTML = emptyState('Aún no has creado ninguna prueba.');
+      grid.innerHTML = emptyState('Todavía no hay pruebas asignadas.');
       return;
     }
 
@@ -50,8 +48,12 @@
     grid.querySelectorAll('[data-archivar]').forEach((link) => {
       link.addEventListener('click', async (e) => {
         e.preventDefault();
-        await Api.post(`/api/pruebas/${link.dataset.archivar}/archivar`);
-        cargarPruebas();
+        try {
+          await Api.post(`/api/pruebas/${link.dataset.archivar}/archivar`);
+          cargarPruebas();
+        } catch (err) {
+          alert(formatError(err));
+        }
       });
     });
   }
