@@ -20,8 +20,8 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
     public function headings(): array
     {
         return $this->prueba->tipo === 'tmt'
-            ? ['Estudiante', 'Correo', 'Parte', 'Tiempo (s)', 'Errores', 'Estado', 'Finalizado']
-            : ['Estudiante', 'Correo', 'Categoría', 'Puntaje', 'Interpretación', 'Finalizado'];
+            ? ['Estudiante', 'Correo', 'Parte', 'Tiempo (s)', 'Errores', 'Estado', 'Finalizado', 'Firmado']
+            : ['Estudiante', 'Correo', 'Categoría', 'Puntaje', 'Interpretación', 'Finalizado', 'Firmado'];
     }
 
     public function collection(): Collection
@@ -37,6 +37,7 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
 
         foreach ($intentos as $intento) {
             $finalizado = optional($intento->finalizado_at)->format('d/m/Y H:i');
+            $firmado = $intento->firmado_at ? 'Sí' : 'No';
 
             if ($esTmt) {
                 foreach ($intento->tmtResultados as $resultado) {
@@ -48,6 +49,7 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
                         $resultado->errores,
                         $resultado->completado ? 'Completada' : 'No superada',
                         $finalizado,
+                        $firmado,
                     ]);
                 }
 
@@ -62,6 +64,7 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
                     $resultado->puntaje,
                     $resultado->etiqueta_interpretacion ?? '—',
                     $finalizado,
+                    $firmado,
                 ]);
             }
         }

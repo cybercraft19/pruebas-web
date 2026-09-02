@@ -56,16 +56,24 @@
           alert('La contraseña debe tener al menos 8 caracteres.');
           return;
         }
-        await Api.post(`/api/estudiantes/${btn.dataset.resetear}/reset-password`, { password: nueva });
-        alert(`Contraseña de ${btn.dataset.nombre} actualizada.`);
+        try {
+          await Api.post(`/api/estudiantes/${btn.dataset.resetear}/reset-password`, { password: nueva });
+          alert(`Contraseña de ${btn.dataset.nombre} actualizada.`);
+        } catch (err) {
+          alert(formatError(err));
+        }
       });
     });
 
     body.querySelectorAll('[data-eliminar]').forEach((btn) => {
       btn.addEventListener('click', async () => {
         if (!confirm(`¿Eliminar a ${btn.dataset.nombre}? Se perderán también sus intentos y resultados.`)) return;
-        await Api.delete(`/api/estudiantes/${btn.dataset.eliminar}`);
-        cargarEstudiantes();
+        try {
+          await Api.delete(`/api/estudiantes/${btn.dataset.eliminar}`);
+          cargarEstudiantes();
+        } catch (err) {
+          alert(formatError(err));
+        }
       });
     });
   }
