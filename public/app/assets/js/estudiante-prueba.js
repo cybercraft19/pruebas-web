@@ -29,6 +29,8 @@
     Alto: 'no-superada',
     Estándar: 'archivada',
     Fortaleza: 'completado',
+    Aceptable: 'borrador',
+    'Por mejorar': 'no-superada',
   };
 
   function mostrarResultados(intento) {

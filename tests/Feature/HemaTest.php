@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\InterpretacionCategoria;
 use App\Models\Prueba;
 use App\Models\User;
 use Database\Seeders\PruebasHemaRejillaSeeder;
@@ -53,6 +54,57 @@ class HemaTest extends TestCase
         $this->assertSame(1, Prueba::where('titulo', self::TITULO)->count());
         $this->assertSame(1, Prueba::where('tipo', 'rejilla')->count());
         $this->assertSame(200, Prueba::where('tipo', 'rejilla')->firstOrFail()->rejillaCeldas()->count());
+    }
+
+    public function test_cada_seccion_tiene_tres_rangos_que_cubren_todo_el_puntaje_sin_huecos(): void
+    {
+        [, $hema] = $this->sembrar();
+
+        foreach ($hema->categorias()->withCount('preguntas')->get() as $categoria) {
+            $bandas = $categoria->interpretaciones()->get();
+
+            $this->assertSame(['Por mejorar', 'Aceptable', 'Fortaleza'], $bandas->pluck('etiqueta')->all());
+            $this->assertSame(0.0, (float) $bandas[0]->valor_min);
+            $this->assertSame((float) $categoria->preguntas_count, (float) $bandas[2]->valor_max);
+
+            // Cada puntaje entero posible cae en exactamente una banda.
+            for ($puntaje = 0; $puntaje <= $categoria->preguntas_count; $puntaje++) {
+                $coincidencias = $bandas->filter(fn ($b) => $puntaje >= $b->valor_min && $puntaje <= $b->valor_max);
+                $this->assertCount(1, $coincidencias, "El puntaje {$puntaje} de {$categoria->nombre} no cae en una única banda.");
+            }
+        }
+    }
+
+    public function test_el_seeder_agrega_las_interpretaciones_a_un_hema_que_ya_existia_sin_ellas(): void
+    {
+        [, $hema] = $this->sembrar();
+        InterpretacionCategoria::whereIn('categoria_evaluacion_id', $hema->categorias()->pluck('id'))->delete();
+
+        $this->seed(PruebasHemaRejillaSeeder::class);
+
+        $this->assertSame(1, Prueba::where('titulo', self::TITULO)->count());
+        $this->assertSame(24, InterpretacionCategoria::whereIn('categoria_evaluacion_id', $hema->categorias()->pluck('id'))->count());
+    }
+
+    public function test_el_resultado_del_estudiante_trae_la_etiqueta_y_la_recomendacion(): void
+    {
+        [, $hema] = $this->sembrar();
+        $estudiante = User::factory()->create(['role' => 'estudiante']);
+        $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $hema->id])->json('id');
+
+        // Todo "No": cada sección queda en 0 = "Por mejorar".
+        foreach ($hema->preguntas()->with('opciones')->get() as $pregunta) {
+            $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/respuestas", [
+                'pregunta_id' => $pregunta->id,
+                'opcion_id' => $pregunta->opciones->firstWhere('texto', 'No')->id,
+            ])->assertOk();
+        }
+
+        $resultados = collect($this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar")->json('resultados'));
+
+        $this->assertCount(8, $resultados);
+        $this->assertSame(['Por mejorar'], $resultados->pluck('etiqueta_interpretacion')->unique()->values()->all());
+        $this->assertNotEmpty($resultados->first()['recomendacion']);
     }
 
     public function test_el_puntaje_de_cada_seccion_es_la_cantidad_de_si(): void
