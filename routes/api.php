@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/intentos', [IntentoController::class, 'store']);
         Route::post('/intentos/{intento}/respuestas', [IntentoController::class, 'responder']);
         Route::post('/intentos/{intento}/tmt', [IntentoController::class, 'registrarTmt']);
+        Route::post('/intentos/{intento}/rejilla', [IntentoController::class, 'registrarRejilla']);
         Route::post('/intentos/{intento}/finalizar', [IntentoController::class, 'finalizar']);
     });
 });

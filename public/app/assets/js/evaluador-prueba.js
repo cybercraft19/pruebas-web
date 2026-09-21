@@ -100,6 +100,39 @@
       publicarBtn.disabled = false;
     }
 
+    if (tipoPrueba === 'rejilla') {
+      document.getElementById('categorias-card').style.display = 'none';
+      document.getElementById('preguntas-card').style.display = 'none';
+      document.getElementById('tmt-card').style.display = 'block';
+      document.getElementById('tmt-card').querySelector('.section-title').textContent = 'Diseño del Test de la Rejilla';
+
+      const contarVariante = (variante) => prueba.rejilla_celdas.filter((c) => c.variante === variante).length;
+      document.getElementById('tmt-resumen').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card__icon">${Icons.grid}</div>
+          <div>
+            <div class="stat-card__value">${contarVariante('estandar')}</div>
+            <div class="stat-card__label">Números rejilla estándar (Harris y Harris)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">${Icons.grid}</div>
+          <div>
+            <div class="stat-card__value">${contarVariante('caballo')}</div>
+            <div class="stat-card__label">Números rejilla del caballo (Núñez Nieto)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon">${Icons.stopwatch}</div>
+          <div>
+            <div class="stat-card__value">60 s</div>
+            <div class="stat-card__label">Tiempo por rejilla (20 o más = buen nivel)</div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     if (tipoPrueba === 'tmt') {
       document.getElementById('categorias-card').style.display = 'none';
       document.getElementById('preguntas-card').style.display = 'none';
@@ -168,7 +201,25 @@
       ? '<span class="badge completado">Firmado</span>'
       : `<button type="button" class="secondary small" data-firmar="${intento.intento_id}">Firmar y publicar</button>`;
 
-    if (tipoPrueba === 'tmt') {
+    if (tipoPrueba === 'rejilla') {
+      document.getElementById('resultados-head').innerHTML =
+        '<tr><th>Estudiante</th><th>Correo</th><th>Rejilla</th><th>Números señalados</th><th>Errores</th><th>Nivel</th><th>Finalizado</th><th>Resultado</th></tr>';
+
+      resultados.forEach((intento) => {
+        intento.rejilla_resultados.forEach((r) => {
+          rows.push([
+            esc(intento.estudiante.name),
+            esc(intento.estudiante.email),
+            r.variante === 'caballo' ? 'Caballo (Núñez Nieto)' : 'Estándar (Harris y Harris)',
+            r.aciertos,
+            r.errores,
+            `<span class="badge ${r.aciertos >= 20 ? 'completado' : 'no-superada'}">${esc(r.nivel)}</span>`,
+            new Date(intento.finalizado_at).toLocaleString(),
+            firmaCelda(intento),
+          ]);
+        });
+      });
+    } else if (tipoPrueba === 'tmt') {
       document.getElementById('resultados-head').innerHTML =
         '<tr><th>Estudiante</th><th>Correo</th><th>Parte</th><th>Tiempo</th><th>Errores</th><th>Estado</th><th>Finalizado</th><th>Resultado</th></tr>';
 

@@ -28,6 +28,7 @@
 
     grid.innerHTML = pruebas.map((p) => {
       const esTmt = p.tipo === 'tmt';
+      const esInteractiva = esTmt || p.tipo === 'rejilla';
       const yaFinalizada = p.mi_intento && p.mi_intento.estado === 'finalizado';
       const enProgreso = p.mi_intento && p.mi_intento.estado === 'en_progreso';
       const boton = yaFinalizada
@@ -36,12 +37,12 @@
       return `
       <div class="test-card">
         <div class="test-card__top">
-          <div class="test-card__icon ${esTmt ? 'tmt' : ''}">${esTmt ? Icons.stopwatch : Icons.fileText}</div>
-          <span class="badge info">${esTmt ? 'TMT' : 'Cuestionario'}</span>
+          <div class="test-card__icon ${esInteractiva ? 'tmt' : ''}">${esInteractiva ? Icons.stopwatch : Icons.fileText}</div>
+          <span class="badge info">${esTmt ? 'TMT' : p.tipo === 'rejilla' ? 'Rejilla' : 'Cuestionario'}</span>
         </div>
         <h3>${esc(p.titulo)}</h3>
         <div class="test-card__meta">
-          <span>${Icons.fileText} ${esTmt ? 'Lienzo interactivo' : `${p.preguntas_count} preguntas`}</span>
+          <span>${Icons.fileText} ${esInteractiva ? 'Prueba interactiva' : `${p.preguntas_count} preguntas`}</span>
           ${p.tiempo_max_minutos ? `<span>${Icons.stopwatch} ${p.tiempo_max_minutos} min</span>` : ''}
         </div>
         ${boton}
@@ -56,7 +57,7 @@
         btn.innerHTML = '<span class="spinner"></span> Cargando…';
         try {
           const intento = await Api.post('/api/intentos', { prueba_id: Number(btn.dataset.pruebaId) });
-          const destino = btn.dataset.tipo === 'tmt' ? 'tmt' : 'prueba';
+          const destino = { tmt: 'tmt', rejilla: 'rejilla' }[btn.dataset.tipo] || 'prueba';
           window.location.href = `/app/estudiante/${destino}.html?intento=${intento.id}`;
         } catch (err) {
           btn.disabled = false;

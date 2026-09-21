@@ -49,4 +49,12 @@ class Prueba extends Model
     {
         return $this->hasMany(TmtNodo::class)->orderBy('parte')->orderBy('practica', 'desc')->orderBy('orden');
     }
+
+    /**
+     * @return HasMany<RejillaCelda, $this>
+     */
+    public function rejillaCeldas(): HasMany
+    {
+        return $this->hasMany(RejillaCelda::class)->orderBy('variante')->orderBy('posicion');
+    }
 }

@@ -25,9 +25,11 @@ class PruebaController extends Controller
     {
         $this->authorizeAcceso($prueba);
 
-        return $prueba->tipo === 'tmt'
-            ? $prueba->load('tmtNodos')
-            : $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']);
+        return match ($prueba->tipo) {
+            'tmt' => $prueba->load('tmtNodos'),
+            'rejilla' => $prueba->load('rejillaCeldas'),
+            default => $prueba->load(['categorias.interpretaciones', 'preguntas.opciones']),
+        };
     }
 
     public function update(Request $request, Prueba $prueba)
@@ -98,6 +100,26 @@ class PruebaController extends Controller
                         'tiempo_segundos' => $resultado->tiempo_segundos,
                         'errores' => $resultado->errores,
                         'completado' => $resultado->completado,
+                    ]),
+                ]);
+        }
+
+        if ($prueba->tipo === 'rejilla') {
+            return $prueba->intentos()
+                ->where('estado', 'finalizado')
+                ->with(['estudiante:id,name,email', 'rejillaResultados'])
+                ->get()
+                ->map(fn ($intento) => [
+                    'intento_id' => $intento->id,
+                    'estudiante' => $intento->estudiante->only(['id', 'name', 'email']),
+                    'finalizado_at' => $intento->finalizado_at,
+                    'firmado' => $intento->firmado_at !== null,
+                    'firmado_at' => $intento->firmado_at,
+                    'rejilla_resultados' => $intento->rejillaResultados->map(fn ($resultado) => [
+                        'variante' => $resultado->variante,
+                        'aciertos' => $resultado->aciertos,
+                        'errores' => $resultado->errores,
+                        'nivel' => $resultado->nivel,
                     ]),
                 ]);
         }

@@ -1178,6 +1178,49 @@ a.test-card:hover h3 {
   color: var(--color-danger-text);
 }
 
+/* ---------- Test de la Rejilla ---------- */
+.rejilla-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  max-width: 560px;
+  margin: 14px auto 0;
+}
+
+.rejilla-cell {
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid transparent;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-size: clamp(0.72rem, 2.6vw, 1rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.rejilla-cell:hover:not(.hecha) {
+  background: var(--color-primary-light);
+}
+
+.rejilla-cell.hecha {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.rejilla-cell.error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
 .quiz-nav {
   display: flex;
   align-items: center;

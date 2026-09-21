@@ -7,6 +7,7 @@ use App\Models\Intento;
 use App\Models\OpcionRespuesta;
 use App\Models\Pregunta;
 use App\Models\Prueba;
+use App\Models\RejillaResultado;
 use App\Models\RespuestaEstudiante;
 use App\Models\TmtResultado;
 use App\Services\ScoringService;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 class IntentoController extends Controller
 {
     private const TMT_LIMITES = ['A' => 100, 'B' => 300];
+
+    private const REJILLA_VARIANTES = ['estandar', 'caballo'];
 
     public function store(Request $request)
     {
@@ -61,9 +64,11 @@ class IntentoController extends Controller
             }
         }
 
-        $relaciones = $prueba->tipo === 'tmt'
-            ? ['prueba.tmtNodos']
-            : ['prueba.categorias', 'prueba.preguntas.opciones'];
+        $relaciones = match ($prueba->tipo) {
+            'tmt' => ['prueba.tmtNodos'],
+            'rejilla' => ['prueba.rejillaCeldas'],
+            default => ['prueba.categorias', 'prueba.preguntas.opciones'],
+        };
 
         return response()->json($intento->load($relaciones), $creado ? 201 : 200);
     }
@@ -92,6 +97,28 @@ class IntentoController extends Controller
                 'errores' => $data['errores'],
                 'completado' => $completado,
             ]
+        );
+
+        return response()->json($resultado);
+    }
+
+    public function registrarRejilla(Request $request, Intento $intento)
+    {
+        $this->authorizeEstudiante($intento);
+        abort_if($intento->estado === 'finalizado', 422, 'El intento ya fue finalizado.');
+
+        $prueba = $intento->prueba()->first();
+        abort_unless($prueba->tipo === 'rejilla', 422, 'Esta prueba no es de tipo rejilla.');
+
+        $data = $request->validate([
+            'variante' => ['required', 'in:'.implode(',', self::REJILLA_VARIANTES)],
+            'aciertos' => ['required', 'integer', 'min:0', 'max:100'],
+            'errores' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $resultado = RejillaResultado::updateOrCreate(
+            ['intento_id' => $intento->id, 'variante' => $data['variante']],
+            ['aciertos' => $data['aciertos'], 'errores' => $data['errores']]
         );
 
         return response()->json($resultado);
@@ -138,6 +165,19 @@ class IntentoController extends Controller
             return response()->json(['intento' => $intento, 'tmt_resultados' => $intento->tmtResultados]);
         }
 
+        if ($prueba->tipo === 'rejilla') {
+            $variantesRegistradas = $intento->rejillaResultados()->pluck('variante');
+            abort_unless(
+                $variantesRegistradas->contains('estandar') && $variantesRegistradas->contains('caballo'),
+                422,
+                'Faltan variantes de la rejilla por completar.'
+            );
+
+            $intento->update(['estado' => 'finalizado', 'finalizado_at' => now()]);
+
+            return response()->json(['intento' => $intento, 'rejilla_resultados' => $intento->rejillaResultados]);
+        }
+
         $totalPreguntas = $prueba->preguntas()->count();
         $totalRespondidas = $intento->respuestas()->count();
 
@@ -158,9 +198,11 @@ class IntentoController extends Controller
     {
         $this->authorizeAcceso($intento);
 
-        $relaciones = $intento->prueba->tipo === 'tmt'
-            ? ['prueba.tmtNodos', 'tmtResultados']
-            : ['prueba.categorias', 'prueba.preguntas.opciones', 'respuestas', 'resultados.categoria'];
+        $relaciones = match ($intento->prueba->tipo) {
+            'tmt' => ['prueba.tmtNodos', 'tmtResultados'],
+            'rejilla' => ['prueba.rejillaCeldas', 'rejillaResultados'],
+            default => ['prueba.categorias', 'prueba.preguntas.opciones', 'respuestas', 'resultados.categoria'],
+        };
 
         return $intento->load($relaciones);
     }

@@ -19,18 +19,25 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
 
     public function headings(): array
     {
-        return $this->prueba->tipo === 'tmt'
-            ? ['Estudiante', 'Correo', 'Parte', 'Tiempo (s)', 'Errores', 'Estado', 'Finalizado', 'Firmado']
-            : ['Estudiante', 'Correo', 'Categoría', 'Puntaje', 'Interpretación', 'Finalizado', 'Firmado'];
+        return match ($this->prueba->tipo) {
+            'tmt' => ['Estudiante', 'Correo', 'Parte', 'Tiempo (s)', 'Errores', 'Estado', 'Finalizado', 'Firmado'],
+            'rejilla' => ['Estudiante', 'Correo', 'Variante', 'Aciertos', 'Errores', 'Nivel', 'Finalizado', 'Firmado'],
+            default => ['Estudiante', 'Correo', 'Categoría', 'Puntaje', 'Interpretación', 'Finalizado', 'Firmado'],
+        };
     }
 
     public function collection(): Collection
     {
         $esTmt = $this->prueba->tipo === 'tmt';
+        $esRejilla = $this->prueba->tipo === 'rejilla';
 
         $intentos = $this->prueba->intentos()
             ->where('estado', 'finalizado')
-            ->with($esTmt ? ['estudiante', 'tmtResultados'] : ['estudiante', 'resultados.categoria'])
+            ->with(match (true) {
+                $esTmt => ['estudiante', 'tmtResultados'],
+                $esRejilla => ['estudiante', 'rejillaResultados'],
+                default => ['estudiante', 'resultados.categoria'],
+            })
             ->get();
 
         $filas = collect();
@@ -48,6 +55,23 @@ class ResultadosExport implements FromCollection, WithHeadings, WithTitle
                         $resultado->tiempo_segundos,
                         $resultado->errores,
                         $resultado->completado ? 'Completada' : 'No superada',
+                        $finalizado,
+                        $firmado,
+                    ]);
+                }
+
+                continue;
+            }
+
+            if ($esRejilla) {
+                foreach ($intento->rejillaResultados as $resultado) {
+                    $filas->push([
+                        $intento->estudiante->name,
+                        $intento->estudiante->email,
+                        $resultado->variante === 'caballo' ? 'Caballo (Núñez Nieto)' : 'Estándar (Harris y Harris)',
+                        $resultado->aciertos,
+                        $resultado->errores,
+                        $resultado->nivel,
                         $finalizado,
                         $firmado,
                     ]);

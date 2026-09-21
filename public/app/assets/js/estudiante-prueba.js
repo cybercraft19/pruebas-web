@@ -121,7 +121,7 @@
 
       if (p.tipo === 'verdadero_falso') {
         return `<div class="tf-options">${p.opciones.map((o) => {
-          const esVerdadero = o.texto.toLowerCase() === 'verdadero';
+          const esVerdadero = ['verdadero', 'sí', 'si'].includes(o.texto.trim().toLowerCase());
           return `
             <button type="button" class="tf-btn ${esVerdadero ? 'tf-btn--true' : 'tf-btn--false'} ${seleccionActual === o.id ? 'selected' : ''}" data-opcion="${o.id}">
               ${esVerdadero ? Icons.checkCircle : Icons.xCircle}

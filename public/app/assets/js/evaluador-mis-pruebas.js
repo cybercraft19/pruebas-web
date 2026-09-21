@@ -29,13 +29,13 @@
     grid.innerHTML = pruebas.map((p) => `
       <div class="test-card">
         <div class="test-card__top">
-          <div class="test-card__icon ${p.tipo === 'tmt' ? 'tmt' : ''}">${p.tipo === 'tmt' ? Icons.stopwatch : Icons.fileText}</div>
+          <div class="test-card__icon ${p.tipo !== 'cuestionario' ? 'tmt' : ''}">${p.tipo !== 'cuestionario' ? Icons.stopwatch : Icons.fileText}</div>
           <span class="badge ${p.estado}">${p.estado}</span>
         </div>
         <h3>${esc(p.titulo)}</h3>
         <div class="test-card__meta">
-          ${p.tipo === 'tmt'
-            ? `<span>${Icons.grid} Lienzo interactivo</span>`
+          ${p.tipo !== 'cuestionario'
+            ? `<span>${Icons.grid} ${p.tipo === 'rejilla' ? 'Rejilla interactiva' : 'Lienzo interactivo'}</span>`
             : `<span>${Icons.fileText} ${p.preguntas_count} preguntas</span><span>${Icons.grid} ${p.categorias_count} categorías</span>`}
         </div>
         <div class="flex-between" style="margin-top:auto">

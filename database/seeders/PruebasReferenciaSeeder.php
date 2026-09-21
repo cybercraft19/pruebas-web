@@ -31,6 +31,8 @@ class PruebasReferenciaSeeder extends Seeder
         $this->crearProcrastinacionAcademica($evaluador);
         $this->crearChaside($evaluador);
         $this->crearEstilosAprendizaje($evaluador);
+
+        $this->call(PruebasHemaRejillaSeeder::class);
     }
 
     private function crearTmt(User $evaluador): void

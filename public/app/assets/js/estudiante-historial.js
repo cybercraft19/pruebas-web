@@ -27,7 +27,7 @@
     }
 
     body.innerHTML = intentos.map((i) => {
-      const destino = i.prueba.tipo === 'tmt' ? 'tmt' : 'prueba';
+      const destino = { tmt: 'tmt', rejilla: 'rejilla' }[i.prueba.tipo] || 'prueba';
       let accion = `<a class="link" href="/app/estudiante/${destino}.html?intento=${i.id}">Continuar</a>`;
       if (i.estado === 'finalizado') {
         accion = i.firmado_at

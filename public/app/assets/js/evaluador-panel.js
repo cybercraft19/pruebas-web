@@ -39,7 +39,7 @@
       const fecha = new Date(p.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
       return `
       <div class="recent-item">
-        <div class="test-card__icon ${p.tipo === 'tmt' ? 'tmt' : ''}" style="margin:0">${p.tipo === 'tmt' ? Icons.stopwatch : Icons.fileText}</div>
+        <div class="test-card__icon ${p.tipo !== 'cuestionario' ? 'tmt' : ''}" style="margin:0">${p.tipo !== 'cuestionario' ? Icons.stopwatch : Icons.fileText}</div>
         <div style="flex:1;min-width:0">
           <div class="recent-item__title">${esc(p.titulo)}</div>
           <div class="recent-item__meta">Creada el ${fecha}</div>

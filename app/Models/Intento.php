@@ -60,6 +60,14 @@ class Intento extends Model
     }
 
     /**
+     * @return HasMany<RejillaResultado, $this>
+     */
+    public function rejillaResultados(): HasMany
+    {
+        return $this->hasMany(RejillaResultado::class);
+    }
+
+    /**
      * El evaluador que firmó y publicó este resultado.
      *
      * @return BelongsTo<User, $this>
