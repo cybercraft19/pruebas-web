@@ -1,0 +1,13 @@
+# Versionado en git a propósito: si no está en el repo, el deploy de Hostinger lo borra.
+# Sirve cuando el Document Root del dominio es la raíz del proyecto (public_html) y no
+# public_html/public: manda toda petición a la carpeta public/ de Laravel. Como nada fuera
+# de public/ es alcanzable por URL, .env, storage y vendor quedan protegidos.
+# Si el Document Root ya apunta a public_html/public, este archivo no molesta.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes
