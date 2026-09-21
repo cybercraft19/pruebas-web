@@ -6,11 +6,43 @@ const Api = (() => {
 
   async function ensureCsrfCookie() {
     if (!getCookie('XSRF-TOKEN')) {
-      await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+      const response = await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+      if (!response.ok) {
+        const error = new Error(`Error ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
     }
   }
 
+  // Cuando muchos estudiantes entran a la vez, el hosting rechaza algunas peticiones con un
+  // error pasajero (500, 502, 503, 504, 508) o se corta la conexión. Reintentar unos segundos
+  // después casi siempre funciona, así que el estudiante ni se entera. No se reintenta lo que
+  // no es seguro repetir (finalizar, firmar, cerrar sesión) ni los errores que no son pasajeros.
+  const REINTENTOS_MAXIMOS = 3;
+  const ESPERA_BASE_MS = 700;
+  const NO_REINTENTAR = /\/(finalizar|firmar|logout)(\?|$)/;
+
+  function esErrorPasajero(error) {
+    return error.status === undefined || [500, 502, 503, 504, 508].includes(error.status);
+  }
+
+  const esperar = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
+
   async function request(url, options = {}) {
+    const puedeReintentar = !NO_REINTENTAR.test(url);
+
+    for (let intento = 0; ; intento += 1) {
+      try {
+        return await peticion(url, options);
+      } catch (error) {
+        if (!puedeReintentar || !esErrorPasajero(error) || intento >= REINTENTOS_MAXIMOS) throw error;
+        await esperar(ESPERA_BASE_MS * 2 ** intento * (0.6 + Math.random() * 0.8));
+      }
+    }
+  }
+
+  async function peticion(url, options) {
     await ensureCsrfCookie();
 
     const headers = {
