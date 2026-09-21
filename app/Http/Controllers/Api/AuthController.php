@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -13,6 +14,9 @@ class AuthController extends Controller
 {
     public function registrarEstudiante(Request $request)
     {
+        // Campo trampa: un humano no lo ve ni lo llena, un bot que completa todo sí.
+        abort_if(filled($request->input('sitio_web')), 422, 'No se pudo completar el registro.');
+
         $evaluador = User::where('role', 'evaluador')->first();
         abort_unless($evaluador, 422, 'No hay ningún evaluador configurado en el sistema todavía.');
 
@@ -25,13 +29,17 @@ class AuthController extends Controller
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
             'acudiente_nombre' => ['required', 'string', 'max:255'],
             'acudiente_telefono' => ['required', 'string', 'max:30'],
+            'acepta_terminos' => ['accepted'],
+        ], [
+            'acepta_terminos.accepted' => 'Debes aceptar el tratamiento de tus datos personales para registrarte.',
         ]);
 
         $estudiante = User::create([
-            ...$data,
+            ...Arr::except($data, ['acepta_terminos']),
             'password' => Hash::make($data['password']),
             'role' => 'estudiante',
             'creado_por' => $evaluador->id,
+            'consentimiento_at' => now(),
         ]);
 
         Auth::login($estudiante);

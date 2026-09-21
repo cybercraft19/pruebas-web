@@ -205,6 +205,41 @@ class AuthenticationTest extends TestCase
         $response->assertUnauthorized();
     }
 
+    public function test_un_curso_entero_puede_iniciar_sesion_desde_la_misma_ip(): void
+    {
+        $estudiantes = User::factory()->count(20)->create(['role' => 'estudiante', 'password' => bcrypt('password123')]);
+
+        foreach ($estudiantes as $estudiante) {
+            $this->withHeader('Origin', 'http://localhost')->postJson('/api/login', [
+                'email' => $estudiante->email,
+                'password' => 'password123',
+            ])->assertOk();
+        }
+    }
+
+    public function test_los_intentos_fallidos_de_una_cuenta_no_bloquean_a_las_demas(): void
+    {
+        $victima = User::factory()->create(['role' => 'estudiante', 'password' => bcrypt('password123')]);
+        $otro = User::factory()->create(['role' => 'estudiante', 'password' => bcrypt('password123')]);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->withHeader('Origin', 'http://localhost')->postJson('/api/login', [
+                'email' => $victima->email,
+                'password' => 'incorrecta',
+            ])->assertUnprocessable();
+        }
+
+        $this->withHeader('Origin', 'http://localhost')->postJson('/api/login', [
+            'email' => $victima->email,
+            'password' => 'password123',
+        ])->assertStatus(429);
+
+        $this->withHeader('Origin', 'http://localhost')->postJson('/api/login', [
+            'email' => $otro->email,
+            'password' => 'password123',
+        ])->assertOk();
+    }
+
     public function test_login_is_throttled_after_too_many_attempts(): void
     {
         $evaluador = User::factory()->create([

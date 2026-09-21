@@ -7,8 +7,8 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PruebaController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::post('/registro', [AuthController::class, 'registrarEstudiante'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/registro', [AuthController::class, 'registrarEstudiante'])->middleware('throttle:registro');
 Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->middleware('throttle:5,1');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1');
 
@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/estudiantes', [EstudianteController::class, 'index']);
         Route::post('/estudiantes', [EstudianteController::class, 'store']);
         Route::get('/estudiantes/exportar', [EstudianteController::class, 'exportar']);
+        Route::get('/estudiantes/{estudiante}', [EstudianteController::class, 'show']);
         Route::put('/estudiantes/{estudiante}', [EstudianteController::class, 'update']);
         Route::delete('/estudiantes/{estudiante}', [EstudianteController::class, 'destroy']);
         Route::post('/estudiantes/{estudiante}/reset-password', [EstudianteController::class, 'resetPassword']);

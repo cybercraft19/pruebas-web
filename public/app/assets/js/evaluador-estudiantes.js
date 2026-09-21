@@ -81,13 +81,14 @@
     const rows = estudiantes.map((e) => [
       `<div style="display:flex;align-items:center;gap:10px">
         <div class="avatar" style="width:28px;height:28px;font-size:0.7rem">${esc(e.name.charAt(0).toUpperCase())}</div>
-        ${esc(e.name)}
+        <a class="link" href="/app/evaluador/estudiante.html?id=${e.id}">${esc(e.name)}</a>
       </div>`,
       esc(e.email),
       e.cedula ? esc(e.cedula) : '—',
       e.telefono ? esc(e.telefono) : '—',
       e.acudiente_nombre ? `${esc(e.acudiente_nombre)}${e.acudiente_telefono ? ` (${esc(e.acudiente_telefono)})` : ''}` : '—',
       `<div style="text-align:right;white-space:nowrap">
+        <a class="icon-btn" style="margin-top:0" title="Ver pruebas y resultados" href="/app/evaluador/estudiante.html?id=${e.id}">${Icons.eye}</a>
         <button type="button" class="icon-btn" style="margin-top:0" title="Editar" data-editar="${e.id}">${Icons.pencil}</button>
         <button type="button" class="icon-btn" style="margin-top:0" title="Restablecer contraseña" data-resetear="${e.id}" data-nombre="${esc(e.name)}">${Icons.key}</button>
         <button type="button" class="icon-btn" style="margin-top:0" title="Eliminar estudiante" data-eliminar="${e.id}" data-nombre="${esc(e.name)}">${Icons.trash}</button>

@@ -21,6 +21,7 @@ class RegistroEstudianteTest extends TestCase
             'fecha_nacimiento' => '2012-05-10',
             'acudiente_nombre' => 'María Pérez',
             'acudiente_telefono' => '3007654321',
+            'acepta_terminos' => true,
         ], $overrides);
     }
 
@@ -78,6 +79,55 @@ class RegistroEstudianteTest extends TestCase
 
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors('cedula');
+    }
+
+    public function test_no_se_puede_registrar_sin_aceptar_el_tratamiento_de_datos(): void
+    {
+        User::factory()->create(['role' => 'evaluador']);
+
+        foreach ([false, null] as $valor) {
+            $response = $this->withHeader('Origin', 'http://localhost')
+                ->postJson('/api/registro', $this->datosValidos(['acepta_terminos' => $valor]));
+
+            $response->assertUnprocessable();
+            $response->assertJsonValidationErrors('acepta_terminos');
+        }
+
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_queda_registrada_la_fecha_del_consentimiento(): void
+    {
+        User::factory()->create(['role' => 'evaluador']);
+
+        $this->withHeader('Origin', 'http://localhost')->postJson('/api/registro', $this->datosValidos())->assertCreated();
+
+        $this->assertNotNull(User::where('email', 'juan@correo.com')->firstOrFail()->consentimiento_at);
+    }
+
+    public function test_un_bot_que_llena_el_campo_trampa_es_rechazado(): void
+    {
+        User::factory()->create(['role' => 'evaluador']);
+
+        $response = $this->withHeader('Origin', 'http://localhost')
+            ->postJson('/api/registro', $this->datosValidos(['sitio_web' => 'http://spam.example']));
+
+        $response->assertUnprocessable();
+        $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_un_curso_entero_puede_registrarse_desde_la_misma_ip(): void
+    {
+        User::factory()->create(['role' => 'evaluador']);
+
+        for ($i = 1; $i <= 15; $i++) {
+            $this->withHeader('Origin', 'http://localhost')->postJson('/api/registro', $this->datosValidos([
+                'email' => "alumno{$i}@correo.com",
+                'cedula' => "100{$i}",
+            ]))->assertCreated();
+        }
+
+        $this->assertSame(15, User::where('role', 'estudiante')->count());
     }
 
     public function test_el_evaluador_puede_crear_un_estudiante_con_los_datos_personales_opcionales(): void

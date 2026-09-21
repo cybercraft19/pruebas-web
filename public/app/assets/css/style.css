@@ -1178,6 +1178,85 @@ a.test-card:hover h3 {
   color: var(--color-danger-text);
 }
 
+/* ---------- Detalle de estudiante (evaluador) ---------- */
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px 20px;
+  margin: 18px 0 0;
+}
+
+.datos-grid dt {
+  font-size: 0.75rem;
+  color: var(--text-muted, var(--text));
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.datos-grid dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.intento-bloque {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.intento-bloque:first-child {
+  border-top: 0;
+  padding-top: 4px;
+}
+
+.intento-bloque table {
+  margin-top: 12px;
+}
+
+/* ---------- Registro: aviso de privacidad y anti-bots ---------- */
+.aviso-privacidad {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+
+.aviso-privacidad summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.aviso-privacidad p {
+  margin: 8px 0 0;
+  color: var(--text-muted, var(--text));
+}
+
+.consentimiento {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.consentimiento input {
+  width: auto;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.campo-trampa {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* ---------- Test de la Rejilla ---------- */
 .rejilla-grid {
   display: grid;
