@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EstudianteController extends Controller
@@ -17,7 +18,7 @@ class EstudianteController extends Controller
         return User::query()
             ->where('role', 'estudiante')
             ->where('creado_por', Auth::id())
-            ->get(['id', 'name', 'email', 'created_at']);
+            ->get(['id', 'name', 'email', 'cedula', 'telefono', 'fecha_nacimiento', 'acudiente_nombre', 'acudiente_telefono', 'created_at']);
     }
 
     public function exportar()
@@ -31,17 +32,40 @@ class EstudianteController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
+            'cedula' => ['nullable', 'string', 'max:50', 'unique:users,cedula'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+            'acudiente_nombre' => ['nullable', 'string', 'max:255'],
+            'acudiente_telefono' => ['nullable', 'string', 'max:30'],
         ]);
 
         $estudiante = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            ...$data,
             'password' => Hash::make($data['password']),
             'role' => 'estudiante',
             'creado_por' => Auth::id(),
         ]);
 
         return response()->json($estudiante, 201);
+    }
+
+    public function update(Request $request, User $estudiante)
+    {
+        $this->authorizeAcceso($estudiante);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($estudiante->id)],
+            'cedula' => ['nullable', 'string', 'max:50', Rule::unique('users', 'cedula')->ignore($estudiante->id)],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+            'acudiente_nombre' => ['nullable', 'string', 'max:255'],
+            'acudiente_telefono' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        $estudiante->update($data);
+
+        return $estudiante;
     }
 
     public function resetPassword(Request $request, User $estudiante)

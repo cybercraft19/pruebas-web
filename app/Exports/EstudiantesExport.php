@@ -19,7 +19,7 @@ class EstudiantesExport implements FromCollection, WithHeadings, WithTitle
 
     public function headings(): array
     {
-        return ['Nombre', 'Correo', 'Creado'];
+        return ['Nombre', 'Correo', 'Cédula', 'Teléfono', 'Fecha de nacimiento', 'Acudiente', 'Teléfono acudiente', 'Creado'];
     }
 
     public function collection(): Collection
@@ -27,10 +27,15 @@ class EstudiantesExport implements FromCollection, WithHeadings, WithTitle
         return User::query()
             ->where('role', 'estudiante')
             ->where('creado_por', $this->evaluadorId)
-            ->get(['name', 'email', 'created_at'])
+            ->get(['name', 'email', 'cedula', 'telefono', 'fecha_nacimiento', 'acudiente_nombre', 'acudiente_telefono', 'created_at'])
             ->map(fn (User $estudiante) => [
                 $estudiante->name,
                 $estudiante->email,
+                $estudiante->cedula ?? '—',
+                $estudiante->telefono ?? '—',
+                $estudiante->fecha_nacimiento?->format('d/m/Y') ?? '—',
+                $estudiante->acudiente_nombre ?? '—',
+                $estudiante->acudiente_telefono ?? '—',
                 $estudiante->created_at->format('d/m/Y H:i'),
             ]);
     }

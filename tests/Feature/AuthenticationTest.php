@@ -123,6 +123,59 @@ class AuthenticationTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $estudianteDeB->id]);
     }
 
+    public function test_evaluador_puede_editar_los_datos_de_su_estudiante(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id, 'name' => 'Nombre Viejo']);
+
+        $response = $this->actingAs($evaluador)->putJson("/api/estudiantes/{$estudiante->id}", [
+            'name' => 'Nombre Corregido',
+            'email' => $estudiante->email,
+            'cedula' => '123456',
+            'telefono' => '3001112233',
+            'acudiente_nombre' => 'Tutor Corregido',
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('users', [
+            'id' => $estudiante->id,
+            'name' => 'Nombre Corregido',
+            'cedula' => '123456',
+            'telefono' => '3001112233',
+            'acudiente_nombre' => 'Tutor Corregido',
+        ]);
+    }
+
+    public function test_evaluador_no_puede_editar_estudiante_de_otro_evaluador(): void
+    {
+        $evaluadorA = User::factory()->create(['role' => 'evaluador']);
+        $evaluadorB = User::factory()->create(['role' => 'evaluador']);
+        $estudianteDeB = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluadorB->id]);
+
+        $response = $this->actingAs($evaluadorA)->putJson("/api/estudiantes/{$estudianteDeB->id}", [
+            'name' => 'Hackeado',
+            'email' => $estudianteDeB->email,
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_no_se_puede_editar_un_estudiante_con_la_cedula_de_otro(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id, 'cedula' => '999']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id, 'cedula' => '111']);
+
+        $response = $this->actingAs($evaluador)->putJson("/api/estudiantes/{$estudiante->id}", [
+            'name' => $estudiante->name,
+            'email' => $estudiante->email,
+            'cedula' => '999',
+        ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors('cedula');
+    }
+
     public function test_evaluador_puede_resetear_password_de_su_estudiante(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);

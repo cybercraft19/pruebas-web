@@ -5,7 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Estudiantes — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
-  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260831" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260921" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <style>
+    #estudiantes-table.dataTable { font-family: var(--font-sans); font-size: 0.88rem; }
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      padding: 5px 8px;
+      margin-left: 6px;
+      font-family: var(--font-sans);
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--color-primary) !important;
+      color: #fff !important;
+      border-radius: var(--radius-sm);
+      border: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -57,8 +75,11 @@
       <div class="main__content">
         <div class="container">
           <div class="card">
-            <div class="section-title">Crear estudiante</div>
-            <p class="section-subtitle">Crea cuentas de acceso para que tus estudiantes puedan presentar pruebas.</p>
+            <div class="flex-between" style="margin-bottom: 0">
+              <div class="section-title" id="estudiante-form-title" style="margin-bottom: 0">Crear estudiante</div>
+              <a class="link" href="#" id="cancelar-edicion-link" style="display:none;font-size:0.85rem">Cancelar edición</a>
+            </div>
+            <p class="section-subtitle" id="estudiante-form-subtitle">Crea cuentas de acceso para que tus estudiantes puedan presentar pruebas.</p>
             <form id="estudiante-form">
               <div class="form-row">
                 <div>
@@ -69,9 +90,33 @@
                   <label for="est-email">Correo</label>
                   <input type="email" id="est-email" required placeholder="nombre@correo.com" />
                 </div>
-                <div>
+                <div id="est-password-wrap">
                   <label for="est-password">Contraseña</label>
-                  <input type="password" id="est-password" required minlength="8" placeholder="Mínimo 8 caracteres" />
+                  <input type="password" id="est-password" minlength="8" placeholder="Mínimo 8 caracteres" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="est-cedula">Cédula (opcional)</label>
+                  <input type="text" id="est-cedula" placeholder="Documento de identidad" />
+                </div>
+                <div>
+                  <label for="est-telefono">Teléfono (opcional)</label>
+                  <input type="tel" id="est-telefono" placeholder="Número de contacto" />
+                </div>
+                <div>
+                  <label for="est-fecha-nacimiento">Fecha de nacimiento (opcional)</label>
+                  <input type="date" id="est-fecha-nacimiento" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
+                  <label for="est-acudiente-nombre">Nombre del acudiente/tutor (opcional)</label>
+                  <input type="text" id="est-acudiente-nombre" placeholder="Nombre completo" />
+                </div>
+                <div>
+                  <label for="est-acudiente-telefono">Teléfono del acudiente/tutor (opcional)</label>
+                  <input type="tel" id="est-acudiente-telefono" placeholder="Número de contacto" />
                 </div>
               </div>
               <button type="submit" id="estudiante-submit"></button>
@@ -86,13 +131,11 @@
               <button type="button" class="secondary small" id="exportar-estudiantes-btn"></button>
             </div>
             <div style="overflow-x:auto">
-              <table>
+              <table id="estudiantes-table" class="display" style="width:100%">
                 <thead>
-                  <tr><th>Nombre</th><th>Correo</th><th></th></tr>
+                  <tr><th>Nombre</th><th>Correo</th><th>Cédula</th><th>Teléfono</th><th>Acudiente</th><th></th></tr>
                 </thead>
-                <tbody id="estudiantes-body">
-                  <tr class="skeleton-row"><td colspan="3"><div class="skeleton-bar"></div></td></tr>
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
           </div>
@@ -101,7 +144,9 @@
     </div>
   </div>
 
-  <script src="/app/assets/js/api.js?v=20260831"></script>
-  <script src="/app/assets/js/evaluador-estudiantes.js?v=20260831"></script>
+  <script src="/app/assets/js/api.js?v=20260921"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="/app/assets/js/evaluador-estudiantes.js?v=20260921"></script>
 </body>
 </html>

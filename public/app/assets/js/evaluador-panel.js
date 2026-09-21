@@ -16,6 +16,7 @@
   document.querySelectorAll('.stat-card__icon')[0].innerHTML = Icons.fileText;
   document.querySelectorAll('.stat-card__icon')[1].innerHTML = Icons.checkCircle;
   document.querySelectorAll('.stat-card__icon')[2].innerHTML = Icons.users;
+  document.querySelectorAll('.stat-card__icon')[3].innerHTML = Icons.users;
 
   const quickIcons = document.querySelectorAll('.test-card__icon');
   quickIcons[0].innerHTML = Icons.fileText;
@@ -59,6 +60,10 @@
     document.getElementById('stat-total').textContent = pruebas.length;
     document.getElementById('stat-publicadas').textContent = pruebas.filter((p) => p.estado === 'publicada').length;
     document.getElementById('stat-estudiantes').textContent = estudiantes.length;
+
+    const haceUnaSemana = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    document.getElementById('stat-nuevos').textContent = estudiantes.filter((e) => new Date(e.created_at).getTime() >= haceUnaSemana).length;
+
     renderRecientes(pruebas);
   }
 
