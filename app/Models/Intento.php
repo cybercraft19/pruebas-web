@@ -60,6 +60,14 @@ class Intento extends Model
     }
 
     /**
+     * @return HasMany<IntentoParte, $this>
+     */
+    public function partes(): HasMany
+    {
+        return $this->hasMany(IntentoParte::class);
+    }
+
+    /**
      * @return HasMany<RejillaResultado, $this>
      */
     public function rejillaResultados(): HasMany

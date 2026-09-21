@@ -109,7 +109,11 @@
         <button id="comenzar-btn">${Icons.play} Comenzar</button>
       </div>
     `;
-    document.getElementById('comenzar-btn').addEventListener('click', onComenzar);
+    const comenzarBtn = document.getElementById('comenzar-btn');
+    comenzarBtn.addEventListener('click', () => {
+      comenzarBtn.disabled = true;
+      onComenzar();
+    });
   }
 
   function renderTablero({ nodos, timed, limite, onCompletar }) {
@@ -372,7 +376,16 @@
         titulo: paso.titulo,
         descripcion: paso.descripcion,
         limite: paso.practica ? null : LIMITES[paso.parte],
-        onComenzar: () => {
+        onComenzar: async function comenzar() {
+          if (!paso.practica) {
+            try {
+              await Api.post(`/api/intentos/${intentoId}/tmt/iniciar`, { parte: paso.parte });
+            } catch (err) {
+              mostrarErrorGuardado('No se pudo iniciar esta parte. Revisá tu conexión e intentá de nuevo.', comenzar);
+              return;
+            }
+          }
+
           const nodos = nodosDe(prueba, paso.parte, paso.practica);
           renderTablero({
             nodos,

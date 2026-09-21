@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Intento;
+use App\Models\IntentoParte;
 use App\Models\OpcionRespuesta;
 use App\Models\Pregunta;
 use App\Models\Prueba;
@@ -20,6 +21,18 @@ class IntentoController extends Controller
     private const TMT_LIMITES = ['A' => 100, 'B' => 300];
 
     private const REJILLA_VARIANTES = ['estandar', 'caballo'];
+
+    /** Margen (s) entre lo que mide el navegador y lo que mide el servidor. */
+    private const TOLERANCIA_SEGUNDOS = 5;
+
+    /** Un humano no conecta un círculo del TMT en menos de esto (s por círculo). */
+    private const TMT_MIN_SEGUNDOS_POR_NODO = 0.25;
+
+    /** Tope generoso de números tocados por segundo en la rejilla (lo real ronda 2). */
+    private const REJILLA_MAX_ACIERTOS_POR_SEGUNDO = 5;
+
+    /** Un minuto de la rejilla más un margen de red antes de dejar de contar el tiempo. */
+    private const REJILLA_SEGUNDOS_MAXIMOS = 75;
 
     public function store(Request $request)
     {
@@ -73,6 +86,28 @@ class IntentoController extends Controller
         return response()->json($intento->load($relaciones), $creado ? 201 : 200);
     }
 
+    public function iniciarTmt(Request $request, Intento $intento)
+    {
+        $this->authorizeEstudiante($intento);
+        abort_if($intento->estado === 'finalizado', 422, 'El intento ya fue finalizado.');
+        abort_unless($intento->prueba()->first()->tipo === 'tmt', 422, 'Esta prueba no es de tipo TMT.');
+
+        $data = $request->validate(['parte' => ['required', 'in:A,B']]);
+
+        return $this->marcarInicio($intento, 'tmt-'.$data['parte']);
+    }
+
+    public function iniciarRejilla(Request $request, Intento $intento)
+    {
+        $this->authorizeEstudiante($intento);
+        abort_if($intento->estado === 'finalizado', 422, 'El intento ya fue finalizado.');
+        abort_unless($intento->prueba()->first()->tipo === 'rejilla', 422, 'Esta prueba no es de tipo rejilla.');
+
+        $data = $request->validate(['variante' => ['required', 'in:'.implode(',', self::REJILLA_VARIANTES)]]);
+
+        return $this->marcarInicio($intento, 'rejilla-'.$data['variante']);
+    }
+
     public function registrarTmt(Request $request, Intento $intento)
     {
         $this->authorizeEstudiante($intento);
@@ -86,6 +121,20 @@ class IntentoController extends Controller
             'tiempo_segundos' => ['required', 'integer', 'min:1'],
             'errores' => ['required', 'integer', 'min:0'],
         ]);
+
+        $transcurrido = $this->segundosDesdeElInicio($intento, 'tmt-'.$data['parte']);
+        $nodos = $prueba->tmtNodos()->where('parte', $data['parte'])->where('practica', false)->count();
+
+        abort_if(
+            $data['tiempo_segundos'] > $transcurrido + self::TOLERANCIA_SEGUNDOS,
+            422,
+            'El tiempo informado es mayor al que realmente transcurrió.'
+        );
+        abort_if(
+            $data['tiempo_segundos'] < floor($nodos * self::TMT_MIN_SEGUNDOS_POR_NODO),
+            422,
+            'El tiempo informado es demasiado corto para completar la parte.'
+        );
 
         $limite = self::TMT_LIMITES[$data['parte']];
         $completado = $data['tiempo_segundos'] <= $limite;
@@ -115,6 +164,14 @@ class IntentoController extends Controller
             'aciertos' => ['required', 'integer', 'min:0', 'max:100'],
             'errores' => ['required', 'integer', 'min:0'],
         ]);
+
+        $transcurrido = min($this->segundosDesdeElInicio($intento, 'rejilla-'.$data['variante']), self::REJILLA_SEGUNDOS_MAXIMOS);
+
+        abort_if(
+            $data['aciertos'] > floor($transcurrido * self::REJILLA_MAX_ACIERTOS_POR_SEGUNDO),
+            422,
+            'Los números señalados no son posibles en el tiempo transcurrido.'
+        );
 
         $resultado = RejillaResultado::updateOrCreate(
             ['intento_id' => $intento->id, 'variante' => $data['variante']],
@@ -223,6 +280,28 @@ class IntentoController extends Controller
         $intento->update(['firmado_at' => now(), 'firmado_por' => Auth::id()]);
 
         return $intento->fresh();
+    }
+
+    private function marcarInicio(Intento $intento, string $parte)
+    {
+        $registro = IntentoParte::updateOrCreate(
+            ['intento_id' => $intento->id, 'parte' => $parte],
+            ['iniciado_at' => now()]
+        );
+
+        return response()->json($registro);
+    }
+
+    /**
+     * Segundos que el servidor lleva contando desde que el estudiante inició la parte.
+     */
+    private function segundosDesdeElInicio(Intento $intento, string $parte): int
+    {
+        $inicio = IntentoParte::where('intento_id', $intento->id)->where('parte', $parte)->first();
+
+        abort_unless($inicio, 422, 'Debes iniciar esta parte antes de registrar su resultado.');
+
+        return max(0, now()->getTimestamp() - $inicio->iniciado_at->getTimestamp());
     }
 
     private function authorizeEstudiante(Intento $intento): void

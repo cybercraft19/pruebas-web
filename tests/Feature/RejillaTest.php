@@ -7,6 +7,7 @@ use App\Models\RejillaResultado;
 use App\Models\User;
 use App\Services\RejillaLayoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class RejillaTest extends TestCase
@@ -93,13 +94,11 @@ class RejillaTest extends TestCase
         $this->assertCount(200, $intento->json('prueba.rejilla_celdas'));
         $intentoId = $intento->json('id');
 
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => 'estandar', 'aciertos' => 24, 'errores' => 2])
+        $this->registrarRejilla($estudiante, $intentoId, 'estandar', aciertos: 24, errores: 2)
             ->assertOk()
             ->assertJsonPath('nivel', 'Buen nivel de concentración');
 
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => 'caballo', 'aciertos' => 12, 'errores' => 5])
+        $this->registrarRejilla($estudiante, $intentoId, 'caballo', aciertos: 12, errores: 5)
             ->assertOk()
             ->assertJsonPath('nivel', 'Necesita entrenar la atención');
 
@@ -124,9 +123,7 @@ class RejillaTest extends TestCase
         $prueba = $this->pruebaRejilla($evaluador);
 
         $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id');
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => 'estandar', 'aciertos' => 10, 'errores' => 0])
-            ->assertOk();
+        $this->registrarRejilla($estudiante, $intentoId, 'estandar', aciertos: 10)->assertOk();
 
         $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar")->assertUnprocessable();
     }
@@ -172,6 +169,32 @@ class RejillaTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_no_se_puede_registrar_una_variante_que_no_se_inicio(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoRejilla();
+
+        $this->actingAs($estudiante)
+            ->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => 'estandar', 'aciertos' => 10, 'errores' => 0])
+            ->assertUnprocessable();
+    }
+
+    public function test_se_rechazan_numeros_imposibles_para_el_tiempo_transcurrido(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoRejilla();
+
+        // 100 números a los 5 segundos: nadie toca 20 números por segundo.
+        $this->registrarRejilla($estudiante, $intentoId, 'estandar', aciertos: 100, segundosReales: 5)->assertUnprocessable();
+        $this->assertDatabaseCount('rejilla_resultados', 0);
+    }
+
+    public function test_un_resultado_humano_se_acepta_y_tambien_el_de_completar_toda_la_rejilla(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoRejilla();
+
+        $this->registrarRejilla($estudiante, $intentoId, 'estandar', aciertos: 24, segundosReales: 60)->assertOk();
+        $this->registrarRejilla($estudiante, $intentoId, 'caballo', aciertos: 100, segundosReales: 45)->assertOk();
+    }
+
     public function test_el_evaluador_puede_ver_el_detalle_y_exportar_una_prueba_de_rejilla(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);
@@ -184,10 +207,37 @@ class RejillaTest extends TestCase
 
         $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id');
         foreach (['estandar', 'caballo'] as $variante) {
-            $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => $variante, 'aciertos' => 22, 'errores' => 1])->assertOk();
+            $this->registrarRejilla($estudiante, $intentoId, $variante, aciertos: 22, errores: 1)->assertOk();
         }
         $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar")->assertOk();
 
         $this->actingAs($evaluador)->get("/api/pruebas/{$prueba->id}/resultados/exportar")->assertOk();
+    }
+
+    /**
+     * @return array{0: User, 1: int}
+     */
+    private function intentoRejilla(): array
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante']);
+        $prueba = $this->pruebaRejilla($evaluador);
+
+        return [$estudiante, $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id')];
+    }
+
+    /**
+     * Inicia la variante, deja pasar el tiempo real indicado y registra el resultado.
+     */
+    private function registrarRejilla(User $estudiante, int $intentoId, string $variante, int $aciertos, int $errores = 0, int $segundosReales = 60): TestResponse
+    {
+        $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/rejilla/iniciar", ['variante' => $variante])->assertOk();
+        $this->travel($segundosReales)->seconds();
+
+        return $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/rejilla", [
+            'variante' => $variante,
+            'aciertos' => $aciertos,
+            'errores' => $errores,
+        ]);
     }
 }

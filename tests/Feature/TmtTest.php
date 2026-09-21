@@ -6,6 +6,7 @@ use App\Models\Prueba;
 use App\Models\User;
 use App\Services\TmtLayoutService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class TmtTest extends TestCase
@@ -63,14 +64,12 @@ class TmtTest extends TestCase
             ->assertCreated()
             ->json('id');
 
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/tmt", ['parte' => 'A', 'tiempo_segundos' => 42, 'errores' => 1])
+        $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 45, tiempoInformado: 42, errores: 1)
             ->assertOk()
             ->assertJsonPath('completado', true);
 
         // Excede el límite de 300s de la parte B -> se registra como no superada (301s).
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/tmt", ['parte' => 'B', 'tiempo_segundos' => 350, 'errores' => 3])
+        $this->registrarTmt($estudiante, $intentoId, 'B', segundosReales: 355, tiempoInformado: 350, errores: 3)
             ->assertOk()
             ->assertJsonPath('completado', false)
             ->assertJsonPath('tiempo_segundos', 301);
@@ -98,12 +97,74 @@ class TmtTest extends TestCase
             ->postJson('/api/intentos', ['prueba_id' => $prueba->id])
             ->json('id');
 
-        $this->actingAs($estudiante)
-            ->postJson("/api/intentos/{$intentoId}/tmt", ['parte' => 'A', 'tiempo_segundos' => 42, 'errores' => 0])
-            ->assertOk();
+        $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 45, tiempoInformado: 42)->assertOk();
 
         $response = $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar");
 
         $response->assertUnprocessable();
+    }
+
+    public function test_no_se_puede_registrar_una_parte_que_no_se_inicio(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoTmtConNodos();
+
+        $this->actingAs($estudiante)
+            ->postJson("/api/intentos/{$intentoId}/tmt", ['parte' => 'A', 'tiempo_segundos' => 42, 'errores' => 0])
+            ->assertUnprocessable();
+    }
+
+    public function test_se_rechaza_un_tiempo_imposiblemente_corto(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoTmtConNodos();
+
+        // 25 círculos en 2 segundos no lo hace un humano, aunque hayan pasado 60 s.
+        $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 60, tiempoInformado: 2)->assertUnprocessable();
+        $this->assertDatabaseCount('tmt_resultados', 0);
+    }
+
+    public function test_se_rechaza_un_tiempo_mayor_al_que_transcurrio(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoTmtConNodos();
+
+        $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 10, tiempoInformado: 90)->assertUnprocessable();
+        $this->assertDatabaseCount('tmt_resultados', 0);
+    }
+
+    public function test_un_tiempo_razonable_se_acepta(): void
+    {
+        [$estudiante, $intentoId] = $this->intentoTmtConNodos();
+
+        $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 30, tiempoInformado: 27)->assertOk();
+        $this->assertDatabaseHas('tmt_resultados', ['intento_id' => $intentoId, 'parte' => 'A', 'tiempo_segundos' => 27]);
+    }
+
+    /**
+     * @return array{0: User, 1: int}
+     */
+    private function intentoTmtConNodos(): array
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante']);
+        $prueba = Prueba::create(['creado_por' => $evaluador->id, 'tipo' => 'tmt', 'titulo' => 'TMT', 'estado' => 'publicada']);
+        app(TmtLayoutService::class)->generar($prueba);
+
+        $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id');
+
+        return [$estudiante, $intentoId];
+    }
+
+    /**
+     * Inicia la parte, deja pasar el tiempo real indicado y registra el resultado informado.
+     */
+    private function registrarTmt(User $estudiante, int $intentoId, string $parte, int $segundosReales, int $tiempoInformado, int $errores = 0): TestResponse
+    {
+        $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/tmt/iniciar", ['parte' => $parte])->assertOk();
+        $this->travel($segundosReales)->seconds();
+
+        return $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/tmt", [
+            'parte' => $parte,
+            'tiempo_segundos' => $tiempoInformado,
+            'errores' => $errores,
+        ]);
     }
 }

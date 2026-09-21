@@ -114,7 +114,11 @@
         <button id="comenzar-btn">${Icons.play} Comenzar</button>
       </div>
     `;
-    document.getElementById('comenzar-btn').addEventListener('click', onComenzar);
+    const comenzarBtn = document.getElementById('comenzar-btn');
+    comenzarBtn.addEventListener('click', () => {
+      comenzarBtn.disabled = true;
+      onComenzar();
+    });
   }
 
   function renderRejilla({ celdas, onCompletar }) {
@@ -239,7 +243,14 @@
       mostrarIntro({
         titulo: paso.titulo,
         descripcion: paso.descripcion,
-        onComenzar: () => {
+        onComenzar: async function comenzar() {
+          try {
+            await Api.post(`/api/intentos/${intentoId}/rejilla/iniciar`, { variante: paso.variante });
+          } catch (err) {
+            mostrarErrorGuardado('No se pudo iniciar esta rejilla. Revisa tu conexión e inténtalo de nuevo.', comenzar);
+            return;
+          }
+
           renderRejilla({
             celdas: celdasDe(prueba, paso.variante),
             onCompletar: ({ aciertos, errores }) => {
