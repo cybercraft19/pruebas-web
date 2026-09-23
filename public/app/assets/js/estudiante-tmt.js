@@ -47,7 +47,7 @@
           <div class="resultado-celebracion__confetti" id="confetti-host"></div>
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Trail Making Test completado!</h2>
-          <p class="muted">Tu evaluador revisará tus resultados y te avisaremos cuando estén disponibles.</p>
+          <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -59,7 +59,7 @@
         <div class="resultado-celebracion__confetti" id="confetti-host"></div>
         <div class="resultado-celebracion__icon">${Icons.award}</div>
         <h2>¡Trail Making Test completado!</h2>
-        <p class="muted">Este es tu resultado por parte.</p>
+        <p class="muted">Este es su resultado por parte.</p>
       </div>
       <div style="overflow-x:auto">
         <table>
@@ -130,11 +130,11 @@
 
     stage.innerHTML = `
       <div class="flex-between">
-        <span class="muted" id="tmt-estado">${timed ? `Mantené presionado sobre "${nodos[0].etiqueta}" y arrastrá sin soltar, conectando en orden.` : 'Práctica — sin tiempo, sin límite de errores.'}</span>
+        <span class="muted" id="tmt-estado">${timed ? `Mantenga presionado sobre "${nodos[0].etiqueta}" y arrastre sin soltar, conectando en orden.` : 'Práctica — sin tiempo, sin límite de errores.'}</span>
         ${timed ? '<span class="badge info" id="tmt-timer">0 s</span>' : ''}
       </div>
       <canvas id="tmt-canvas" width="${ANCHO}" height="${ALTO}"
-        style="width:100%;max-width:${ANCHO}px;aspect-ratio:${ANCHO}/${ALTO};border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;touch-action:none;display:block;margin-top:14px;cursor:crosshair;"></canvas>
+        style="width:100%;max-width:${ANCHO}px;aspect-ratio:${ANCHO}/${ALTO};border:1px solid var(--border);border-radius:var(--radius-md);background:#fff;touch-action:none;display:block;margin-top:14px;cursor:none;"></canvas>
       <div class="flex-between" style="margin-top:12px">
         <span class="muted" id="tmt-errores">Errores: 0</span>
       </div>
@@ -182,28 +182,21 @@
         ctx.restore();
       }
 
-      const pulso = (Math.sin(performance.now() / 260) + 1) / 2;
-
-      nodos.forEach((nodo, indice) => {
+      // Ningún nodo se marca como "el siguiente": el test mide que el estudiante lo
+      // encuentre solo. El único nodo que se distingue es el que ya está conectado
+      // (visitado, como el trazo de lápiz en la hoja real) o el que acaba de fallar.
+      nodos.forEach((nodo) => {
         const { x, y } = coords(nodo);
-        const esObjetivo = indice === siguienteIndice;
+        const indice = nodos.indexOf(nodo);
         const visitado = indice < siguienteIndice;
         const conError = nodo === nodoError;
-
-        if (esObjetivo && !terminado) {
-          ctx.beginPath();
-          ctx.arc(x, y, RADIO + 5 + pulso * 5, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(79, 70, 229, ${0.4 - pulso * 0.22})`;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
 
         ctx.beginPath();
         ctx.arc(x, y, RADIO, 0, Math.PI * 2);
         ctx.fillStyle = conError ? '#fee2e2' : visitado ? '#e0e7ff' : '#ffffff';
         ctx.fill();
-        ctx.strokeStyle = conError ? '#dc2626' : esObjetivo ? '#4f46e5' : visitado ? '#818cf8' : '#cbd5e1';
-        ctx.lineWidth = esObjetivo ? 3 : 2;
+        ctx.strokeStyle = conError ? '#dc2626' : visitado ? '#818cf8' : '#cbd5e1';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = conError ? '#991b1b' : visitado ? '#4338ca' : '#1e293b';
@@ -212,6 +205,31 @@
         ctx.textBaseline = 'middle';
         ctx.fillText(nodo.etiqueta, x, y);
       });
+
+      // Cursor propio: el puntero del sistema puede ser invisible sobre el fondo
+      // blanco del lienzo según el tema del equipo (canvas usa cursor:none).
+      if (punteroPos) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        [
+          { color: '#ffffff', width: 4 },
+          { color: '#1e293b', width: 2 },
+        ].forEach(({ color, width }) => {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(punteroPos.x - 9, punteroPos.y);
+          ctx.lineTo(punteroPos.x + 9, punteroPos.y);
+          ctx.moveTo(punteroPos.x, punteroPos.y - 9);
+          ctx.lineTo(punteroPos.x, punteroPos.y + 9);
+          ctx.stroke();
+        });
+        ctx.beginPath();
+        ctx.arc(punteroPos.x, punteroPos.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.restore();
+      }
     }
 
     function animar() {
@@ -297,15 +315,17 @@
     });
 
     canvas.addEventListener('pointermove', (e) => {
-      if (!arrastrando || terminado) return;
       const { x, y } = posDesdeEvento(e);
       punteroPos = { x, y };
-      intentarAvanzar(x, y);
+      if (arrastrando && !terminado) intentarAvanzar(x, y);
+    });
+
+    canvas.addEventListener('pointerleave', () => {
+      if (!arrastrando) punteroPos = null;
     });
 
     canvas.addEventListener('pointerup', () => {
       arrastrando = false;
-      punteroPos = null;
     });
 
     canvas.addEventListener('pointercancel', () => {
@@ -331,21 +351,21 @@
     if (!registradas.has('A')) {
       pasos.push({
         parte: 'A', practica: true, titulo: 'Práctica — Parte A',
-        descripcion: 'Une los círculos numerados en orden, del 1 al 8, tan rápido como puedas. Esta ronda no se cronometra.',
+        descripcion: 'Una los círculos numerados en orden, del 1 al 8, tan rápido como pueda. Esta ronda no se cronometra.',
       });
       pasos.push({
         parte: 'A', practica: false, titulo: 'Parte A',
-        descripcion: 'Ahora une los círculos del 1 al 25 en orden, lo más rápido posible.',
+        descripcion: 'Ahora una los círculos del 1 al 25 en orden, lo más rápido posible.',
       });
     }
     if (!registradas.has('B')) {
       pasos.push({
         parte: 'B', practica: true, titulo: 'Práctica — Parte B',
-        descripcion: 'Alterna entre números y letras: 1 → A → 2 → B → 3 → C… Esta ronda no se cronometra.',
+        descripcion: 'Alterne entre números y letras: 1 → A → 2 → B → 3 → C… Esta ronda no se cronometra.',
       });
       pasos.push({
         parte: 'B', practica: false, titulo: 'Parte B',
-        descripcion: 'Ahora alterna número y letra en orden hasta llegar al 13, lo más rápido posible.',
+        descripcion: 'Ahora alterne número y letra en orden hasta llegar al 13, lo más rápido posible.',
       });
     }
 
@@ -364,7 +384,7 @@
           const resultado = await Api.post(`/api/intentos/${intentoId}/finalizar`);
           mostrarResultadosFinales(resultado.tmt_resultados, null);
         } catch (err) {
-          mostrarErrorGuardado('No se pudo guardar tu resultado final. Revisá tu conexión e intentá de nuevo.', siguientePaso);
+          mostrarErrorGuardado('No se pudo guardar su resultado final. Revise su conexión e intente de nuevo.', siguientePaso);
         }
         return;
       }
@@ -381,7 +401,7 @@
             try {
               await Api.post(`/api/intentos/${intentoId}/tmt/iniciar`, { parte: paso.parte });
             } catch (err) {
-              mostrarErrorGuardado('No se pudo iniciar esta parte. Revisá tu conexión e intentá de nuevo.', comenzar);
+              mostrarErrorGuardado('No se pudo iniciar esta parte. Revise su conexión e intente de nuevo.', comenzar);
               return;
             }
           }
@@ -400,7 +420,7 @@
                   pasoActual += 1;
                   setTimeout(siguientePaso, paso.practica ? 400 : 1000);
                 } catch (err) {
-                  mostrarErrorGuardado('No se pudo guardar tu resultado de esta parte. Revisá tu conexión e intentá de nuevo.', avanzar);
+                  mostrarErrorGuardado('No se pudo guardar su resultado de esta parte. Revise su conexión e intente de nuevo.', avanzar);
                 }
               };
               avanzar();
