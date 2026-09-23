@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
 
     Route::get('/intentos/{intento}', [IntentoController::class, 'show']);
+    Route::get('/intentos/{intento}/informe', [IntentoController::class, 'informe']);
     Route::get('/pruebas-publicadas', [PruebaController::class, 'publicadas']);
 
     Route::middleware('role:evaluador')->group(function () {

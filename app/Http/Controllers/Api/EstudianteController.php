@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Intento;
 use App\Models\Prueba;
 use App\Models\User;
+use App\Services\InformeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class EstudianteController extends Controller
 {
+    public function __construct(private readonly InformeService $informeService) {}
+
     public function index()
     {
         return User::query()
@@ -81,7 +84,7 @@ class EstudianteController extends Controller
                 'finalizado_at' => $intento->finalizado_at,
                 'firmado' => $intento->firmado_at !== null,
                 'firmado_at' => $intento->firmado_at,
-                'resumen' => $intento->estado === 'finalizado' ? $this->resumenDe($intento) : [],
+                'resumen' => $intento->estado === 'finalizado' ? $this->informeService->resumenDe($intento) : [],
             ]),
             'pendientes' => $pendientes,
         ];
@@ -126,36 +129,6 @@ class EstudianteController extends Controller
         $estudiante->delete();
 
         return response()->noContent();
-    }
-
-    /**
-     * Resultado de un intento como filas homogéneas (concepto, valor, interpretación,
-     * recomendación), sin importar si la prueba es cuestionario, TMT o rejilla.
-     *
-     * @return array<int, array{concepto: string, valor: string, interpretacion: ?string, recomendacion: ?string}>
-     */
-    private function resumenDe(Intento $intento): array
-    {
-        return match ($intento->prueba->tipo) {
-            'tmt' => $intento->tmtResultados->map(fn ($resultado) => [
-                'concepto' => "Parte {$resultado->parte}",
-                'valor' => "{$resultado->tiempo_segundos} s · {$resultado->errores} errores",
-                'interpretacion' => $resultado->completado ? 'Completada' : 'No superada',
-                'recomendacion' => null,
-            ])->values()->all(),
-            'rejilla' => $intento->rejillaResultados->map(fn ($resultado) => [
-                'concepto' => $resultado->variante === 'caballo' ? 'Rejilla del caballo (Núñez Nieto)' : 'Rejilla estándar (Harris y Harris)',
-                'valor' => "{$resultado->aciertos} números · {$resultado->errores} errores",
-                'interpretacion' => $resultado->nivel,
-                'recomendacion' => null,
-            ])->values()->all(),
-            default => $intento->resultados->map(fn ($resultado) => [
-                'concepto' => $resultado->categoria->nombre,
-                'valor' => (string) round((float) $resultado->puntaje, 2),
-                'interpretacion' => $resultado->etiqueta_interpretacion,
-                'recomendacion' => $resultado->recomendacion,
-            ])->values()->all(),
-        };
     }
 
     private function authorizeAcceso(User $estudiante): void

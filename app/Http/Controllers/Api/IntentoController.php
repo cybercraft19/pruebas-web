@@ -11,6 +11,7 @@ use App\Models\Prueba;
 use App\Models\RejillaResultado;
 use App\Models\RespuestaEstudiante;
 use App\Models\TmtResultado;
+use App\Services\InformeService;
 use App\Services\ScoringService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -262,6 +263,24 @@ class IntentoController extends Controller
         };
 
         return $intento->load($relaciones);
+    }
+
+    /**
+     * Datos listos para el informe (base para cuando exista la plantilla visual): el evaluador
+     * dueño de la prueba lo puede ver aunque no esté firmado todavía (para revisar antes de
+     * firmar); el estudiante solo una vez que está firmado, igual que el resto del sitio.
+     */
+    public function informe(Intento $intento, InformeService $informeService)
+    {
+        $userId = Auth::id();
+        $esEvaluador = $intento->prueba->creado_por === $userId;
+        $esEstudiante = $intento->estudiante_id === $userId;
+
+        abort_unless($esEvaluador || $esEstudiante, 403);
+        abort_if($esEstudiante && ! $esEvaluador && $intento->firmado_at === null, 403, 'El informe todavía no está disponible.');
+        abort_unless($intento->estado === 'finalizado', 422, 'El intento todavía no está finalizado.');
+
+        return $informeService->generar($intento);
     }
 
     public function mios()
