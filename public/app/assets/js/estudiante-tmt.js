@@ -206,6 +206,21 @@
         ctx.fillText(nodo.etiqueta, x, y);
       });
 
+      // "Inicio" y "Fin" sobre el primer y el último nodo de la secuencia,
+      // igual que en la hoja oficial del Trail Making Test.
+      if (nodos.length > 0) {
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'italic 600 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        const inicio = coords(nodos[0]);
+        ctx.fillText('Inicio', inicio.x, inicio.y - RADIO - 6);
+        if (nodos.length > 1) {
+          const fin = coords(nodos[nodos.length - 1]);
+          ctx.fillText('Fin', fin.x, fin.y - RADIO - 6);
+        }
+      }
+
       // Cursor propio: el puntero del sistema puede ser invisible sobre el fondo
       // blanco del lienzo según el tema del equipo (canvas usa cursor:none).
       if (punteroPos) {
