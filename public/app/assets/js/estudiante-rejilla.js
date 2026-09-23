@@ -52,7 +52,7 @@
           <div class="resultado-celebracion__confetti" id="confetti-host"></div>
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Test de la Rejilla completado!</h2>
-          <p class="muted">Tu evaluador revisará tus resultados y te avisaremos cuando estén disponibles.</p>
+          <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -64,7 +64,7 @@
         <div class="resultado-celebracion__confetti" id="confetti-host"></div>
         <div class="resultado-celebracion__icon">${Icons.award}</div>
         <h2>¡Test de la Rejilla completado!</h2>
-        <p class="muted">Este es tu resultado por rejilla.</p>
+        <p class="muted">Este es su resultado por rejilla.</p>
       </div>
       <div style="overflow-x:auto">
         <table>
@@ -129,7 +129,7 @@
 
     stage.innerHTML = `
       <div class="flex-between">
-        <span class="muted" id="rejilla-estado">Toca los números en orden, empezando por el 00.</span>
+        <span class="muted" id="rejilla-estado">Toque los números en orden, empezando por el 00.</span>
         <span class="badge info" id="rejilla-timer">${SEGUNDOS} s</span>
       </div>
       <div class="rejilla-grid" id="rejilla-grid">
@@ -174,8 +174,8 @@
         celda.classList.add('hecha');
         siguiente += 1;
         aciertosEl.textContent = `Señalados: ${siguiente}`;
-        estadoEl.textContent = siguiente < TOTAL ? `Sigue con el ${pad(siguiente)}.` : '';
-        if (siguiente === TOTAL) finalizar('¡Completaste la rejilla!');
+        estadoEl.textContent = siguiente < TOTAL ? `Siga con el ${pad(siguiente)}.` : '';
+        if (siguiente === TOTAL) finalizar('¡Completó la rejilla!');
         return;
       }
 
@@ -206,14 +206,14 @@
       pasos.push({
         variante: 'estandar',
         titulo: NOMBRES.estandar,
-        descripcion: 'Toca los números del 00 al 99 en orden ascendente, de menor a mayor. Señala todos los que puedas.',
+        descripcion: 'Toque los números del 00 al 99 en orden ascendente, de menor a mayor. Señale todos los que pueda.',
       });
     }
     if (!registradas.has('caballo')) {
       pasos.push({
         variante: 'caballo',
         titulo: NOMBRES.caballo,
-        descripcion: 'Es otra rejilla, con los números en otro orden. Toca de nuevo los números del 00 al 99 en orden ascendente.',
+        descripcion: 'Es otra rejilla, con los números en otro orden. Toque de nuevo los números del 00 al 99 en orden ascendente.',
       });
     }
 
@@ -232,7 +232,7 @@
           const resultado = await Api.post(`/api/intentos/${intentoId}/finalizar`);
           mostrarResultadosFinales(resultado.rejilla_resultados, null);
         } catch (err) {
-          mostrarErrorGuardado('No se pudo guardar tu resultado final. Revisa tu conexión e inténtalo de nuevo.', siguientePaso);
+          mostrarErrorGuardado('No se pudo guardar su resultado final. Revise su conexión e intente de nuevo.', siguientePaso);
         }
         return;
       }
@@ -247,7 +247,7 @@
           try {
             await Api.post(`/api/intentos/${intentoId}/rejilla/iniciar`, { variante: paso.variante });
           } catch (err) {
-            mostrarErrorGuardado('No se pudo iniciar esta rejilla. Revisa tu conexión e inténtalo de nuevo.', comenzar);
+            mostrarErrorGuardado('No se pudo iniciar esta rejilla. Revise su conexión e intente de nuevo.', comenzar);
             return;
           }
 
@@ -260,7 +260,7 @@
                   pasoActual += 1;
                   setTimeout(siguientePaso, 1000);
                 } catch (err) {
-                  mostrarErrorGuardado('No se pudo guardar tu resultado de esta rejilla. Revisa tu conexión e inténtalo de nuevo.', guardar);
+                  mostrarErrorGuardado('No se pudo guardar su resultado de esta rejilla. Revise su conexión e intente de nuevo.', guardar);
                 }
               };
               guardar();

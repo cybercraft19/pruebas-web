@@ -31,7 +31,7 @@
     const host = document.getElementById('recientes-list');
 
     if (pruebas.length === 0) {
-      host.innerHTML = emptyState('Todavía no creaste ninguna prueba.');
+      host.innerHTML = emptyState('Todavía no ha creado ninguna prueba.');
       return;
     }
 

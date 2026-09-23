@@ -35,7 +35,7 @@
   function entrarModoEdicion(estudiante) {
     editandoId = estudiante.id;
     formTitle.textContent = `Editar a ${estudiante.name}`;
-    formSubtitle.textContent = 'Corregí los datos y guardá los cambios. La contraseña se cambia aparte, con el ícono de llave.';
+    formSubtitle.textContent = 'Corrija los datos y guarde los cambios. La contraseña se cambia aparte, con el ícono de llave.';
     passwordWrap.style.display = 'none';
     cancelarLink.style.display = 'inline';
     submitBtn.innerHTML = `${Icons.checkCircle} Guardar cambios`;
@@ -54,7 +54,7 @@
   function salirModoEdicion() {
     editandoId = null;
     formTitle.textContent = 'Crear estudiante';
-    formSubtitle.textContent = 'Crea cuentas de acceso para que tus estudiantes puedan presentar pruebas.';
+    formSubtitle.textContent = 'Cree cuentas de acceso para que sus estudiantes puedan presentar pruebas.';
     passwordWrap.style.display = '';
     cancelarLink.style.display = 'none';
     submitBtn.innerHTML = `${Icons.plus} Crear estudiante`;

@@ -44,7 +44,7 @@
           <div class="resultado-celebracion__confetti" id="confetti-host"></div>
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Prueba completada!</h2>
-          <p class="muted">Tu evaluador revisará tus resultados y te avisaremos cuando estén disponibles.</p>
+          <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -56,7 +56,7 @@
         <div class="resultado-celebracion__confetti" id="confetti-host"></div>
         <div class="resultado-celebracion__icon">${Icons.award}</div>
         <h2>¡Prueba completada!</h2>
-        <p class="muted">Este es tu resultado por categoría.</p>
+        <p class="muted">Este es su resultado por categoría.</p>
       </div>
       <div style="overflow-x:auto">
         <table>
