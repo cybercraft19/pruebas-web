@@ -45,6 +45,7 @@
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Prueba completada!</h2>
           <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
+          <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -63,6 +64,9 @@
           <thead><tr><th>Categoría</th><th>Puntaje</th><th>Interpretación</th><th>Recomendación</th></tr></thead>
           <tbody id="resultados-body"></tbody>
         </table>
+      </div>
+      <div style="text-align:center">
+        <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
       </div>
     `;
     document.getElementById('resultados-body').innerHTML = intento.resultados.map((r) => `

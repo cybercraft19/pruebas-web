@@ -53,6 +53,7 @@
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Test de la Rejilla completado!</h2>
           <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
+          <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -77,11 +78,14 @@
                 <td>${NOMBRES[variante]}</td>
                 <td>${r.aciertos}</td>
                 <td>${r.errores}</td>
-                <td><span class="badge ${r.aciertos >= 20 ? 'completado' : 'no-superada'}">${esc(r.nivel)}</span></td>
+                <td><span class="badge info">${esc(r.nivel)}</span></td>
               </tr>`;
             }).join('')}
           </tbody>
         </table>
+      </div>
+      <div style="text-align:center">
+        <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
       </div>
     `;
     lanzarConfeti(document.getElementById('confetti-host'));

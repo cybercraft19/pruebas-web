@@ -5,35 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Informe — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
-  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924a" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924c" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <style>
-    body { background: #f1f2f6; }
-    .informe-shell { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+    :root { --informe-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif; }
+    body { background: #e7e9ef; }
+    .informe-shell { max-width: 840px; margin: 0 auto; padding: 24px 16px 80px; }
     .informe-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .informe-doc { background: #fff; border-radius: var(--radius-md); box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 40px 48px; }
-    .informe-doc h1 { text-align: center; font-size: 1.35rem; margin-bottom: 4px; }
-    .informe-doc .subtitulo { text-align: center; color: var(--text-muted); margin-bottom: 24px; }
-    .informe-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px 24px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-    .informe-datos dt { font-size: 0.78rem; color: var(--text-muted); }
-    .informe-datos dd { font-weight: 600; margin: 0; }
-    .informe-doc p { line-height: 1.6; margin-bottom: 12px; }
-    .informe-doc h2 { font-size: 1.05rem; margin: 28px 0 4px; }
-    .informe-doc h3 { font-size: 0.95rem; margin: 20px 0 2px; color: var(--color-primary); }
-    .informe-instrumento { font-size: 0.92rem; margin-bottom: 10px; }
-    .informe-instrumento strong { display: block; }
-    .informe-resultado { margin-top: 32px; padding-top: 20px; border-top: 2px solid var(--border); }
-    .informe-grafica { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 14px; }
-    .informe-chip { background: var(--surface-alt, #f5f6fa); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.85rem; }
-    .informe-chip b { display: block; font-size: 1.05rem; }
+    .informe-doc {
+      background: #fff; border-radius: 4px; box-shadow: 0 2px 10px rgba(20,20,40,0.12);
+      padding: 0 0 48px; font-family: var(--informe-serif); color: #1e2330;
+    }
+    .informe-letterhead {
+      display: flex; align-items: center; gap: 16px; padding: 28px 48px 20px;
+      border-bottom: 3px solid var(--color-primary);
+    }
+    .informe-letterhead img { height: 46px; width: auto; }
+    .informe-letterhead .titulos { flex: 1; font-family: var(--font-sans); }
+    .informe-letterhead h1 { font-size: 1.15rem; margin: 0; color: var(--color-primary); letter-spacing: 0.02em; }
+    .informe-letterhead .subtitulo { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .informe-body { padding: 32px 48px 0; }
+    .informe-datos {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px 28px;
+      margin-bottom: 28px; padding: 16px 20px; background: #f8f7f3; border-radius: 4px;
+      font-family: var(--font-sans);
+    }
+    .informe-datos dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px; }
+    .informe-datos dd { font-weight: 600; margin: 0; font-size: 0.95rem; }
+    .informe-doc p { line-height: 1.7; margin-bottom: 13px; font-size: 0.98rem; text-align: justify; }
+    .informe-doc h2 {
+      font-family: var(--font-sans); font-size: 1rem; font-weight: 700; margin: 30px 0 10px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border); color: #14203a;
+    }
+    .informe-doc h3 { font-family: var(--font-sans); font-size: 0.88rem; font-weight: 700; margin: 16px 0 6px; color: var(--color-primary); }
+    .informe-instrumento {
+      font-family: var(--font-sans); font-size: 0.86rem; margin-bottom: 12px; padding: 10px 14px;
+      border-left: 3px solid var(--color-accent, var(--color-primary)); background: #fbfbf9;
+    }
+    .informe-instrumento strong { display: block; font-size: 0.92rem; margin-bottom: 3px; }
+    .informe-resultado {
+      margin-top: 34px; padding: 22px 24px; border: 1px solid var(--border); border-radius: 6px;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .informe-resultado h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; display: flex; align-items: center; gap: 8px; }
+    .informe-resultado h2::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
+    .informe-grafica { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 16px; font-family: var(--font-sans); }
+    .informe-chip { background: #f2f4f8; border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.8rem; min-width: 110px; }
+    .informe-chip .muted { font-size: 0.72rem; display: block; }
+    .informe-chip b { display: block; font-size: 1.1rem; font-family: var(--informe-serif); margin: 2px 0; }
     .informe-doc ul { margin: 6px 0 14px 22px; }
-    .informe-doc li { margin-bottom: 4px; line-height: 1.5; }
-    .informe-firma { margin-top: 40px; text-align: center; }
-    .informe-firma .linea { width: 220px; border-top: 1px solid #333; margin: 0 auto 6px; }
-    .informe-vacio { text-align: center; padding: 40px 0; color: var(--text-muted); }
+    .informe-doc li { margin-bottom: 5px; line-height: 1.55; font-size: 0.95rem; }
+    .informe-firma { margin-top: 48px; text-align: center; font-family: var(--font-sans); }
+    .informe-firma .linea { width: 240px; border-top: 1px solid #333; margin: 0 auto 8px; }
+    .informe-firma p { text-align: center; font-family: var(--font-sans); font-size: 0.85rem; }
+    .informe-vacio { text-align: center; padding: 50px 0; color: var(--text-muted); font-family: var(--font-sans); }
     @media print {
       body { background: #fff; }
       .informe-toolbar { display: none; }
-      .informe-doc { box-shadow: none; padding: 0; }
+      .informe-doc { box-shadow: none; }
       .informe-shell { max-width: none; padding: 0; }
     }
   </style>
@@ -45,12 +75,14 @@
       <button type="button" class="secondary small" id="imprimir-btn">Imprimir / Guardar PDF</button>
     </div>
     <div class="informe-doc" id="informe-doc">
-      <div class="skeleton-bar" style="height:20px;margin-bottom:10px"></div>
-      <div class="skeleton-bar" style="height:14px;width:60%;margin:0 auto"></div>
+      <div style="padding:32px 48px">
+        <div class="skeleton-bar" style="height:20px;margin-bottom:10px"></div>
+        <div class="skeleton-bar" style="height:14px;width:60%"></div>
+      </div>
     </div>
   </div>
 
-  <script src="/app/assets/js/api.js?v=20260924a"></script>
+  <script src="/app/assets/js/api.js?v=20260924c"></script>
   <script>
     const params = new URLSearchParams(window.location.search);
     const estudianteId = params.get('estudiante');
@@ -110,10 +142,19 @@
         const edadTexto = est.edad !== null && est.edad !== undefined ? `${est.edad} años` : '—';
         const generoTexto = est.genero || '—';
         const gradoTexto = est.grado ? `${est.grado}°` : '—';
+        const letterhead = `
+          <div class="informe-letterhead">
+            <img src="/app/assets/img/pentum-lockup.png" alt="Pentum" />
+            <div class="titulos">
+              <h1>Informe de resultados</h1>
+              <div class="subtitulo">Batería de instrumentos psicoeducativos</div>
+            </div>
+          </div>
+        `;
 
         if (!data.resultados.length) {
           doc.innerHTML = `
-            <h1>Informe de resultados</h1>
+            ${letterhead}
             <div class="informe-vacio">
               <p>Todavía no hay resultados firmados para mostrar en el informe.</p>
             </div>
@@ -122,40 +163,41 @@
         }
 
         doc.innerHTML = `
-          <h1>Informe de resultados</h1>
-          <p class="subtitulo">Batería de instrumentos psicoeducativos</p>
-          <dl class="informe-datos">
-            <div><dt>Nombre</dt><dd>${esc(est.nombre)}</dd></div>
-            <div><dt>Edad</dt><dd>${esc(edadTexto)}</dd></div>
-            <div><dt>Género</dt><dd>${esc(generoTexto)}</dd></div>
-            <div><dt>Grado</dt><dd>${esc(gradoTexto)}</dd></div>
-            <div><dt>Fecha del informe</dt><dd>${formatearFecha(new Date().toISOString())}</dd></div>
-          </dl>
+          ${letterhead}
+          <div class="informe-body">
+            <dl class="informe-datos">
+              <div><dt>Nombre</dt><dd>${esc(est.nombre)}</dd></div>
+              <div><dt>Edad</dt><dd>${esc(edadTexto)}</dd></div>
+              <div><dt>Género</dt><dd>${esc(generoTexto)}</dd></div>
+              <div><dt>Grado</dt><dd>${esc(gradoTexto)}</dd></div>
+              <div><dt>Fecha del informe</dt><dd>${formatearFecha(new Date().toISOString())}</dd></div>
+            </dl>
 
-          ${data.introduccion.map((p) => `<p>${esc(p)}</p>`).join('')}
+            ${data.introduccion.map((p) => `<p>${esc(p)}</p>`).join('')}
 
-          <h2>Instrumentos aplicados</h2>
-          ${data.instrumentos.map((i, idx) => `
-            <p class="informe-instrumento">
-              <strong>${idx + 1}. ${esc(i.titulo)}</strong>
-              <span class="muted">Área explorada:</span> ${esc(i.area)}<br />
-              <span class="muted">Objetivo:</span> ${esc(i.objetivo)}
-            </p>
-          `).join('')}
+            <h2>Instrumentos aplicados</h2>
+            ${data.instrumentos.map((i, idx) => `
+              <p class="informe-instrumento">
+                <strong>${idx + 1}. ${esc(i.titulo)}</strong>
+                <span class="muted">Área explorada:</span> ${esc(i.area)}<br />
+                <span class="muted">Objetivo:</span> ${esc(i.objetivo)}
+              </p>
+            `).join('')}
 
-          <h2 style="margin-top:32px">Resultados</h2>
-          ${data.resultados.map(bloqueResultado).join('')}
+            <h2 style="margin-top:36px">Resultados</h2>
+            ${data.resultados.map(bloqueResultado).join('')}
 
-          <div class="informe-firma">
-            <div class="linea"></div>
-            <p style="margin:0"><strong>${esc(data.firma.nombre)}</strong></p>
-            <p class="muted" style="margin:0">${esc(data.firma.cargo)}</p>
-            <p class="muted" style="margin:0">${esc(data.firma.titulo)}</p>
-            <p class="muted" style="margin:0">${esc(data.firma.tarjeta_profesional)}</p>
+            <div class="informe-firma">
+              <div class="linea"></div>
+              <p style="margin:0"><strong>${esc(data.firma.nombre)}</strong></p>
+              <p class="muted" style="margin:0">${esc(data.firma.cargo)}</p>
+              <p class="muted" style="margin:0">${esc(data.firma.titulo)}</p>
+              <p class="muted" style="margin:0">${esc(data.firma.tarjeta_profesional)}</p>
+            </div>
           </div>
         `;
       } catch (err) {
-        doc.innerHTML = `<div class="error">${esc(formatError(err))}</div>`;
+        doc.innerHTML = `<div class="error" style="margin:32px 48px">${esc(formatError(err))}</div>`;
       }
     }
 

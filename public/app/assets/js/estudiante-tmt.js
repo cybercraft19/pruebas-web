@@ -48,6 +48,7 @@
           <div class="resultado-celebracion__icon">${Icons.award}</div>
           <h2>¡Trail Making Test completado!</h2>
           <p class="muted">Su evaluador revisará sus resultados y le avisaremos cuando estén disponibles.</p>
+          <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
         </div>
       `;
       lanzarConfeti(document.getElementById('confetti-host'));
@@ -77,6 +78,9 @@
             }).join('')}
           </tbody>
         </table>
+      </div>
+      <div style="text-align:center">
+        <a class="secondary" href="/app/estudiante/index.html" style="text-decoration:none;display:inline-block;margin-top:14px">Volver a mis pruebas</a>
       </div>
     `;
     lanzarConfeti(document.getElementById('confetti-host'));
@@ -306,8 +310,10 @@
         return;
       }
 
+      // Los nodos ya conectados no cuentan como error al pasar de nuevo por encima: es
+      // parte normal del trazo hacia el siguiente número/letra, igual que en la hoja real.
       const nodoTocado = nodos.find((nodo, indice) => {
-        if (indice === siguienteIndice) return false;
+        if (indice <= siguienteIndice) return false;
         const { x: nx, y: ny } = coords(nodo);
         return Math.hypot(x - nx, y - ny) <= RADIO;
       });
