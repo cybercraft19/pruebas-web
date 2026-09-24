@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Estudiantes — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
-  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260923a" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924a" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
   <style>
     #estudiantes-table.dataTable { font-family: var(--font-sans); font-size: 0.88rem; }
@@ -111,6 +111,34 @@
               </div>
               <div class="form-row">
                 <div>
+                  <label for="est-grado">Grado (opcional)</label>
+                  <select id="est-grado">
+                    <option value="">Sin especificar</option>
+                    <option value="1">1°</option>
+                    <option value="2">2°</option>
+                    <option value="3">3°</option>
+                    <option value="4">4°</option>
+                    <option value="5">5°</option>
+                    <option value="6">6°</option>
+                    <option value="7">7°</option>
+                    <option value="8">8°</option>
+                    <option value="9">9°</option>
+                    <option value="10">10°</option>
+                    <option value="11">11°</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="est-genero">Género (opcional)</label>
+                  <select id="est-genero">
+                    <option value="">Sin especificar</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div>
                   <label for="est-acudiente-nombre">Nombre del acudiente/tutor (opcional)</label>
                   <input type="text" id="est-acudiente-nombre" placeholder="Nombre completo" />
                 </div>
@@ -144,9 +172,9 @@
     </div>
   </div>
 
-  <script src="/app/assets/js/api.js?v=20260923a"></script>
+  <script src="/app/assets/js/api.js?v=20260924a"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-  <script src="/app/assets/js/evaluador-estudiantes.js?v=20260923a"></script>
+  <script src="/app/assets/js/evaluador-estudiantes.js?v=20260924a"></script>
 </body>
 </html>

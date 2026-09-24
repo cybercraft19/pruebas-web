@@ -48,7 +48,7 @@ class PruebasHemaRejillaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'rejilla',
             'titulo' => self::TITULO_REJILLA,
-            'instrucciones' => 'Toca los números en orden ascendente, de menor a mayor, empezando por el 00. Tienes un minuto por cada rejilla: señala todos los que puedas.',
+            'instrucciones' => 'Toque los números en orden ascendente, de menor a mayor, empezando por el 00. Tiene un minuto por cada rejilla: señale todos los que pueda.',
             'estado' => 'publicada',
         ]);
 
@@ -61,8 +61,9 @@ class PruebasHemaRejillaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => self::TITULO_HEMA,
-            'instrucciones' => 'Responde Sí o No a cada pregunta. Al final se cuenta cuántas respuestas afirmativas tuviste en cada sección (el máximo es de 10 puntos por sección, y 9 en Salud física y emocional).',
+            'instrucciones' => 'Responda Sí o No a cada pregunta. Al final se cuenta cuántas respuestas afirmativas tuvo en cada sección (el máximo es de 10 puntos por sección, y 9 en Salud física y emocional).',
             'estado' => 'publicada',
+            'requiere_bachillerato' => true,
         ]);
 
         $numero = 0;

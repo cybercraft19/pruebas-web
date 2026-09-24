@@ -27,11 +27,13 @@ class AuthController extends Controller
             'cedula' => ['required', 'string', 'max:50', 'unique:users,cedula'],
             'telefono' => ['required', 'string', 'max:30'],
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
+            'grado' => ['required', 'integer', 'min:1', 'max:11'],
+            'genero' => ['required', 'string', 'in:Femenino,Masculino,Otro'],
             'acudiente_nombre' => ['required', 'string', 'max:255'],
             'acudiente_telefono' => ['required', 'string', 'max:30'],
             'acepta_terminos' => ['accepted'],
         ], [
-            'acepta_terminos.accepted' => 'Debes aceptar el tratamiento de tus datos personales para registrarte.',
+            'acepta_terminos.accepted' => 'Debe aceptar el tratamiento de sus datos personales para registrarse.',
         ]);
 
         $estudiante = User::create([

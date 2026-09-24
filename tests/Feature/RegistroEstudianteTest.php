@@ -19,6 +19,8 @@ class RegistroEstudianteTest extends TestCase
             'cedula' => '1234567890',
             'telefono' => '3001234567',
             'fecha_nacimiento' => '2012-05-10',
+            'grado' => 5,
+            'genero' => 'Masculino',
             'acudiente_nombre' => 'María Pérez',
             'acudiente_telefono' => '3007654321',
             'acepta_terminos' => true,

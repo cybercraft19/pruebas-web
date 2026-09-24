@@ -40,6 +40,8 @@ class EstudianteController extends Controller
             'cedula' => ['nullable', 'string', 'max:50', 'unique:users,cedula'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+            'grado' => ['nullable', 'integer', 'min:1', 'max:11'],
+            'genero' => ['nullable', 'string', 'in:Femenino,Masculino,Otro'],
             'acudiente_nombre' => ['nullable', 'string', 'max:255'],
             'acudiente_telefono' => ['nullable', 'string', 'max:30'],
         ]);
@@ -100,6 +102,8 @@ class EstudianteController extends Controller
             'cedula' => ['nullable', 'string', 'max:50', Rule::unique('users', 'cedula')->ignore($estudiante->id)],
             'telefono' => ['nullable', 'string', 'max:30'],
             'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+            'grado' => ['nullable', 'integer', 'min:1', 'max:11'],
+            'genero' => ['nullable', 'string', 'in:Femenino,Masculino,Otro'],
             'acudiente_nombre' => ['nullable', 'string', 'max:255'],
             'acudiente_telefono' => ['nullable', 'string', 'max:30'],
         ]);

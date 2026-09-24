@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Crear cuenta — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
-  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260923a" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924a" />
 </head>
 <body>
   <div class="login-shell">
@@ -38,8 +38,37 @@
           </div>
         </div>
 
-        <label for="fecha_nacimiento">Fecha de nacimiento</label>
-        <input type="date" id="fecha_nacimiento" required />
+        <div class="form-row">
+          <div>
+            <label for="fecha_nacimiento">Fecha de nacimiento</label>
+            <input type="date" id="fecha_nacimiento" required />
+          </div>
+          <div>
+            <label for="genero">Género</label>
+            <select id="genero" required>
+              <option value="" disabled selected>Seleccione</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="grado">Grado</label>
+        <select id="grado" required>
+          <option value="" disabled selected>Seleccione</option>
+          <option value="1">1°</option>
+          <option value="2">2°</option>
+          <option value="3">3°</option>
+          <option value="4">4°</option>
+          <option value="5">5°</option>
+          <option value="6">6°</option>
+          <option value="7">7°</option>
+          <option value="8">8°</option>
+          <option value="9">9°</option>
+          <option value="10">10°</option>
+          <option value="11">11°</option>
+        </select>
 
         <div class="form-row">
           <div>
@@ -59,7 +88,7 @@
 
         <details class="aviso-privacidad">
           <summary>Aviso de privacidad y tratamiento de datos</summary>
-          <p>Recopilamos sus datos personales (nombre, correo, cédula, teléfono, fecha de nacimiento y datos de su acudiente o tutor) únicamente para crear su cuenta, aplicar las pruebas y generar sus informes de resultados.</p>
+          <p>Recopilamos sus datos personales (nombre, correo, cédula, teléfono, fecha de nacimiento, género, grado escolar y datos de su acudiente o tutor) únicamente para crear su cuenta, aplicar las pruebas y generar sus informes de resultados.</p>
           <p>Solo tienen acceso a esta información usted y el evaluador responsable. No se venden ni se comparten con terceros ajenos a la evaluación.</p>
           <p>Puede pedirle al evaluador que consulte, corrija o elimine sus datos en cualquier momento.</p>
           <p>Si es menor de edad, su acudiente o tutor debe autorizar este registro.</p>
@@ -80,7 +109,7 @@
     </div>
   </div>
 
-  <script src="/app/assets/js/api.js?v=20260923a"></script>
+  <script src="/app/assets/js/api.js?v=20260924a"></script>
   <script>
     document.getElementById('toggle-password').innerHTML = Icons.eye;
 
@@ -108,6 +137,8 @@
           cedula: document.getElementById('cedula').value,
           telefono: document.getElementById('telefono').value,
           fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+          genero: document.getElementById('genero').value,
+          grado: document.getElementById('grado').value,
           acudiente_nombre: document.getElementById('acudiente_nombre').value,
           acudiente_telefono: document.getElementById('acudiente_telefono').value,
           acepta_terminos: document.getElementById('acepta_terminos').checked,

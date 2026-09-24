@@ -7,9 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['creado_por', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos', 'estado', 'pdf_referencia_path'])]
+#[Fillable(['creado_por', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos', 'estado', 'pdf_referencia_path', 'requiere_bachillerato'])]
 class Prueba extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'requiere_bachillerato' => 'boolean',
+        ];
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

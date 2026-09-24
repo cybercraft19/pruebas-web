@@ -47,4 +47,40 @@ class PruebaGestionTest extends TestCase
         $response->assertOk();
         $this->assertEmpty($response->json());
     }
+
+    public function test_un_estudiante_de_primaria_no_ve_las_pruebas_de_bachillerato(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'grado' => 4]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'TMT', 'estado' => 'publicada', 'requiere_bachillerato' => false]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'CHASIDE', 'estado' => 'publicada', 'requiere_bachillerato' => true]);
+
+        $titulos = $this->actingAs($estudiante)->getJson('/api/pruebas-publicadas')->json('*.titulo');
+
+        $this->assertSame(['TMT'], $titulos);
+    }
+
+    public function test_un_estudiante_de_bachillerato_ve_todas_las_pruebas(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'grado' => 9]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'TMT', 'estado' => 'publicada', 'requiere_bachillerato' => false]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'CHASIDE', 'estado' => 'publicada', 'requiere_bachillerato' => true]);
+
+        $titulos = $this->actingAs($estudiante)->getJson('/api/pruebas-publicadas')->json('*.titulo');
+
+        $this->assertCount(2, $titulos);
+    }
+
+    public function test_un_estudiante_sin_grado_registrado_ve_todas_las_pruebas(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'grado' => null]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'TMT', 'estado' => 'publicada', 'requiere_bachillerato' => false]);
+        Prueba::create(['creado_por' => $evaluador->id, 'titulo' => 'CHASIDE', 'estado' => 'publicada', 'requiere_bachillerato' => true]);
+
+        $titulos = $this->actingAs($estudiante)->getJson('/api/pruebas-publicadas')->json('*.titulo');
+
+        $this->assertCount(2, $titulos);
+    }
 }

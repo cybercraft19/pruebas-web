@@ -41,7 +41,7 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'tmt',
             'titulo' => 'Trail Making Test (TMT)',
-            'instrucciones' => 'Une los círculos en el orden indicado lo más rápido que puedas, sin levantar el dedo del recorrido.',
+            'instrucciones' => 'Una los círculos en el orden indicado lo más rápido que pueda, sin levantar el dedo del recorrido.',
             'estado' => 'publicada',
         ]);
 
@@ -54,7 +54,7 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => 'Cuestionario de Autoevaluación de la Ansiedad ante los Exámenes',
-            'instrucciones' => 'Indica con qué frecuencia te ocurre cada situación: 1 = nunca o casi nunca, 5 = siempre o casi siempre.',
+            'instrucciones' => 'Indique con qué frecuencia le ocurre cada situación: 1 = nunca o casi nunca, 5 = siempre o casi siempre.',
             'estado' => 'publicada',
         ]);
 
@@ -137,7 +137,7 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => 'Test de las Inteligencias Múltiples (H. Gardner)',
-            'instrucciones' => 'Marca "Verdadero" si la afirmación refleja una característica tuya, o "Falso" si no la refleja.',
+            'instrucciones' => 'Marque "Verdadero" si la afirmación refleja una característica suya, o "Falso" si no la refleja.',
             'estado' => 'publicada',
         ]);
 
@@ -238,8 +238,9 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => 'Escala de Procrastinación Académica',
-            'instrucciones' => 'Lee cada afirmación sobre tu forma de estudiar y elegí la opción que más se ajuste a vos.',
+            'instrucciones' => 'Lea cada afirmación sobre su forma de estudiar y elija la opción que más se ajuste a usted.',
             'estado' => 'publicada',
+            'requiere_bachillerato' => true,
         ]);
 
         $categoria = CategoriaEvaluacion::create([
@@ -317,8 +318,9 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => 'Test de Orientación Vocacional (CHASIDE)',
-            'instrucciones' => 'Respondé Sí o No pensando en el tipo de profesión o la actitud que implica cada pregunta. No omitas ninguna.',
+            'instrucciones' => 'Responda Sí o No pensando en el tipo de profesión o la actitud que implica cada pregunta. No omita ninguna.',
             'estado' => 'publicada',
+            'requiere_bachillerato' => true,
         ]);
 
         $areasInfo = [
@@ -508,7 +510,7 @@ class PruebasReferenciaSeeder extends Seeder
             'creado_por' => $evaluador->id,
             'tipo' => 'cuestionario',
             'titulo' => 'Test de Estilo de Aprendizaje (Modelo PNL)',
-            'instrucciones' => 'Elegí, de cada pregunta, la opción con la que más te identifiques.',
+            'instrucciones' => 'Elija, de cada pregunta, la opción con la que más se identifique.',
             'estado' => 'publicada',
         ]);
 

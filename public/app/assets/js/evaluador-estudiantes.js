@@ -45,6 +45,8 @@
     document.getElementById('est-cedula').value = estudiante.cedula || '';
     document.getElementById('est-telefono').value = estudiante.telefono || '';
     document.getElementById('est-fecha-nacimiento').value = estudiante.fecha_nacimiento ? estudiante.fecha_nacimiento.slice(0, 10) : '';
+    document.getElementById('est-grado').value = estudiante.grado || '';
+    document.getElementById('est-genero').value = estudiante.genero || '';
     document.getElementById('est-acudiente-nombre').value = estudiante.acudiente_nombre || '';
     document.getElementById('est-acudiente-telefono').value = estudiante.acudiente_telefono || '';
 
@@ -148,6 +150,8 @@
       cedula: document.getElementById('est-cedula').value || null,
       telefono: document.getElementById('est-telefono').value || null,
       fecha_nacimiento: document.getElementById('est-fecha-nacimiento').value || null,
+      grado: document.getElementById('est-grado').value || null,
+      genero: document.getElementById('est-genero').value || null,
       acudiente_nombre: document.getElementById('est-acudiente-nombre').value || null,
       acudiente_telefono: document.getElementById('est-acudiente-telefono').value || null,
     };

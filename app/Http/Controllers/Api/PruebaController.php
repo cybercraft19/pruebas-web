@@ -66,8 +66,13 @@ class PruebaController extends Controller
 
     public function publicadas()
     {
+        $grado = Auth::user()->grado;
+
         return Prueba::query()
             ->where('estado', 'publicada')
+            // Sin grado registrado (cuentas antiguas creadas antes de este campo): se
+            // muestran todas, para no bloquear a nadie por datos que no llegó a cargar.
+            ->when($grado !== null && $grado < 6, fn ($query) => $query->where('requiere_bachillerato', false))
             ->withCount('preguntas')
             ->with(['intentos' => fn ($query) => $query->where('estudiante_id', Auth::id())])
             ->get(['id', 'tipo', 'titulo', 'instrucciones', 'tiempo_max_minutos'])
