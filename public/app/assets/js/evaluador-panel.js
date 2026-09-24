@@ -20,8 +20,7 @@
 
   const quickIcons = document.querySelectorAll('.test-card__icon');
   quickIcons[0].innerHTML = Icons.fileText;
-  quickIcons[1].innerHTML = Icons.stopwatch;
-  quickIcons[2].innerHTML = Icons.users;
+  quickIcons[1].innerHTML = Icons.users;
 
   function emptyState(mensaje) {
     return `<div class="empty-state">${Icons.inbox}<p>${mensaje}</p></div>`;
