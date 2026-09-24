@@ -109,10 +109,10 @@ class InformeTest extends TestCase
         $this->assertTrue($grafica[0]['aprobado']);
     }
 
-    public function test_el_informe_de_rejilla_trae_el_umbral(): void
+    public function test_el_informe_de_rejilla_sin_edad_conocida_usa_el_umbral_de_respaldo(): void
     {
         $evaluador = User::factory()->create(['role' => 'evaluador']);
-        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id]);
+        $estudiante = User::factory()->create(['role' => 'estudiante', 'creado_por' => $evaluador->id, 'fecha_nacimiento' => null]);
         $prueba = Prueba::create(['creado_por' => $evaluador->id, 'tipo' => 'rejilla', 'titulo' => 'Rejilla', 'estado' => 'publicada']);
         app(RejillaLayoutService::class)->generar($prueba);
 
@@ -126,7 +126,32 @@ class InformeTest extends TestCase
 
         $grafica = $this->actingAs($evaluador)->getJson("/api/intentos/{$intentoId}/informe")->json('grafica');
 
-        $this->assertSame(20, $grafica[0]['umbral_buen_nivel']);
-        $this->assertTrue($grafica[0]['aprobado']);
+        $this->assertSame('Buen nivel de concentración', $grafica[0]['nivel']);
+        $this->assertNull($grafica[0]['bandas']);
+    }
+
+    public function test_el_informe_de_rejilla_usa_la_banda_de_la_edad_del_estudiante(): void
+    {
+        $evaluador = User::factory()->create(['role' => 'evaluador']);
+        // 10 años: tabla 9-12, donde 24 aciertos cae en "Promedio / Normal" (18 a 25).
+        $estudiante = User::factory()->create([
+            'role' => 'estudiante', 'creado_por' => $evaluador->id,
+            'fecha_nacimiento' => now()->subYears(10),
+        ]);
+        $prueba = Prueba::create(['creado_por' => $evaluador->id, 'tipo' => 'rejilla', 'titulo' => 'Rejilla', 'estado' => 'publicada']);
+        app(RejillaLayoutService::class)->generar($prueba);
+
+        $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $prueba->id])->json('id');
+        foreach (['estandar', 'caballo'] as $variante) {
+            $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/rejilla/iniciar", ['variante' => $variante])->assertOk();
+            $this->travel(60)->seconds();
+            $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/rejilla", ['variante' => $variante, 'aciertos' => 24, 'errores' => 1])->assertOk();
+        }
+        $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar")->assertOk();
+
+        $grafica = $this->actingAs($evaluador)->getJson("/api/intentos/{$intentoId}/informe")->json('grafica');
+
+        $this->assertStringContainsString('Promedio / Normal', $grafica[0]['nivel']);
+        $this->assertCount(5, $grafica[0]['bandas']);
     }
 }

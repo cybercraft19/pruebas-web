@@ -92,9 +92,9 @@ class InformeService
                 'concepto' => $resultado->variante === 'caballo' ? 'Rejilla del caballo (Núñez Nieto)' : 'Rejilla estándar (Harris y Harris)',
                 'valor' => $resultado->aciertos,
                 'unidad' => 'números señalados',
-                'umbral_buen_nivel' => 20,
                 'maximo' => 100,
-                'aprobado' => $resultado->aciertos >= 20,
+                'nivel' => $resultado->nivel,
+                'bandas' => $resultado->bandasAplicables(),
             ])->values()->all(),
             default => $intento->resultados->map(fn ($resultado) => [
                 'concepto' => $resultado->categoria->nombre,
