@@ -135,6 +135,13 @@ class EstudianteController extends Controller
         return response()->noContent();
     }
 
+    public function informe(User $estudiante)
+    {
+        $this->authorizeAcceso($estudiante);
+
+        return $this->informeService->completoDe($estudiante);
+    }
+
     private function authorizeAcceso(User $estudiante): void
     {
         abort_unless($estudiante->role === 'estudiante', 404);

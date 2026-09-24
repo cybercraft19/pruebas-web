@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Detalle del estudiante — Sistema de Pruebas</title>
   <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
-  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260923a" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924b" />
 </head>
 <body>
   <div class="app-shell">
@@ -54,7 +54,10 @@
       <div class="main__content">
         <div class="container">
           <div class="card">
-            <h1 id="est-nombre" style="font-size:1.3rem">Estudiante</h1>
+            <div class="flex-between">
+              <h1 id="est-nombre" style="font-size:1.3rem">Estudiante</h1>
+              <a class="secondary small" id="ver-informe-link" href="#" style="text-decoration:none">Ver informe completo</a>
+            </div>
             <p class="muted" id="est-correo" style="margin-top:4px"></p>
             <dl class="datos-grid" id="datos-grid"></dl>
           </div>
@@ -76,7 +79,7 @@
     </div>
   </div>
 
-  <script src="/app/assets/js/api.js?v=20260923a"></script>
-  <script src="/app/assets/js/evaluador-estudiante.js?v=20260923a"></script>
+  <script src="/app/assets/js/api.js?v=20260924b"></script>
+  <script src="/app/assets/js/evaluador-estudiante.js?v=20260924b"></script>
 </body>
 </html>

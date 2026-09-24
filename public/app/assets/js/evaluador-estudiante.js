@@ -19,6 +19,7 @@
     window.location.href = '/app/evaluador/estudiantes.html';
     return;
   }
+  document.getElementById('ver-informe-link').href = `/app/informe.html?estudiante=${estudianteId}`;
 
   const TIPOS = { cuestionario: 'Cuestionario', tmt: 'TMT', rejilla: 'Rejilla' };
 

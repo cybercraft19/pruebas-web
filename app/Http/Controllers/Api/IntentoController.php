@@ -291,6 +291,11 @@ class IntentoController extends Controller
             ->get();
     }
 
+    public function miInforme(InformeService $informeService)
+    {
+        return $informeService->completoDe(Auth::user());
+    }
+
     public function firmar(Intento $intento)
     {
         $this->authorizeEvaluador($intento);

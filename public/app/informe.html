@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Informe — Sistema de Pruebas</title>
+  <link rel="icon" type="image/png" href="/app/assets/img/favicon.png" />
+  <link rel="stylesheet" href="/app/assets/css/style.css?v=20260924a" />
+  <style>
+    body { background: #f1f2f6; }
+    .informe-shell { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+    .informe-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .informe-doc { background: #fff; border-radius: var(--radius-md); box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 40px 48px; }
+    .informe-doc h1 { text-align: center; font-size: 1.35rem; margin-bottom: 4px; }
+    .informe-doc .subtitulo { text-align: center; color: var(--text-muted); margin-bottom: 24px; }
+    .informe-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px 24px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .informe-datos dt { font-size: 0.78rem; color: var(--text-muted); }
+    .informe-datos dd { font-weight: 600; margin: 0; }
+    .informe-doc p { line-height: 1.6; margin-bottom: 12px; }
+    .informe-doc h2 { font-size: 1.05rem; margin: 28px 0 4px; }
+    .informe-doc h3 { font-size: 0.95rem; margin: 20px 0 2px; color: var(--color-primary); }
+    .informe-instrumento { font-size: 0.92rem; margin-bottom: 10px; }
+    .informe-instrumento strong { display: block; }
+    .informe-resultado { margin-top: 32px; padding-top: 20px; border-top: 2px solid var(--border); }
+    .informe-grafica { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 14px; }
+    .informe-chip { background: var(--surface-alt, #f5f6fa); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.85rem; }
+    .informe-chip b { display: block; font-size: 1.05rem; }
+    .informe-doc ul { margin: 6px 0 14px 22px; }
+    .informe-doc li { margin-bottom: 4px; line-height: 1.5; }
+    .informe-firma { margin-top: 40px; text-align: center; }
+    .informe-firma .linea { width: 220px; border-top: 1px solid #333; margin: 0 auto 6px; }
+    .informe-vacio { text-align: center; padding: 40px 0; color: var(--text-muted); }
+    @media print {
+      body { background: #fff; }
+      .informe-toolbar { display: none; }
+      .informe-doc { box-shadow: none; padding: 0; }
+      .informe-shell { max-width: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="informe-shell">
+    <div class="informe-toolbar">
+      <a class="link" href="#" id="volver-link" style="font-size:0.9rem">← Volver</a>
+      <button type="button" class="secondary small" id="imprimir-btn">Imprimir / Guardar PDF</button>
+    </div>
+    <div class="informe-doc" id="informe-doc">
+      <div class="skeleton-bar" style="height:20px;margin-bottom:10px"></div>
+      <div class="skeleton-bar" style="height:14px;width:60%;margin:0 auto"></div>
+    </div>
+  </div>
+
+  <script src="/app/assets/js/api.js?v=20260924a"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const estudianteId = params.get('estudiante');
+    const doc = document.getElementById('informe-doc');
+
+    document.getElementById('volver-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (estudianteId) {
+        window.location.href = `/app/evaluador/estudiante.html?id=${estudianteId}`;
+      } else {
+        window.location.href = '/app/estudiante/historial.html';
+      }
+    });
+    document.getElementById('imprimir-btn').addEventListener('click', () => window.print());
+
+    function formatearFecha(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function bloqueGrafica(resultado) {
+      const g = resultado.grafica || [];
+      if (!g.length) return '';
+      return `<div class="informe-grafica">${g.map((fila) => `
+        <div class="informe-chip">
+          <span class="muted">${esc(fila.concepto)}</span>
+          <b>${esc(String(fila.valor))}${fila.unidad ? ` ${esc(fila.unidad)}` : ''}</b>
+          ${fila.etiqueta || fila.nivel ? `<span class="muted">${esc(fila.etiqueta || fila.nivel)}</span>` : ''}
+        </div>
+      `).join('')}</div>`;
+    }
+
+    function bloqueResultado(resultado) {
+      const n = resultado.narrativa;
+      const parrafos = (n && n.parrafos || []).map((p) => `<p>${esc(p)}</p>`).join('');
+      const recomendaciones = n && n.recomendaciones
+        ? `<h3>Recomendaciones</h3><ul>${n.recomendaciones.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>`
+        : '';
+
+      return `
+        <div class="informe-resultado">
+          <h2>${esc((n && n.titulo) || resultado.prueba.titulo)}</h2>
+          ${bloqueGrafica(resultado)}
+          ${parrafos}
+          ${recomendaciones}
+        </div>
+      `;
+    }
+
+    async function cargar() {
+      try {
+        const data = estudianteId
+          ? await Api.get(`/api/estudiantes/${estudianteId}/informe`)
+          : await Api.get('/api/mi-informe');
+
+        const est = data.estudiante;
+        const edadTexto = est.edad !== null && est.edad !== undefined ? `${est.edad} años` : '—';
+        const generoTexto = est.genero || '—';
+        const gradoTexto = est.grado ? `${est.grado}°` : '—';
+
+        if (!data.resultados.length) {
+          doc.innerHTML = `
+            <h1>Informe de resultados</h1>
+            <div class="informe-vacio">
+              <p>Todavía no hay resultados firmados para mostrar en el informe.</p>
+            </div>
+          `;
+          return;
+        }
+
+        doc.innerHTML = `
+          <h1>Informe de resultados</h1>
+          <p class="subtitulo">Batería de instrumentos psicoeducativos</p>
+          <dl class="informe-datos">
+            <div><dt>Nombre</dt><dd>${esc(est.nombre)}</dd></div>
+            <div><dt>Edad</dt><dd>${esc(edadTexto)}</dd></div>
+            <div><dt>Género</dt><dd>${esc(generoTexto)}</dd></div>
+            <div><dt>Grado</dt><dd>${esc(gradoTexto)}</dd></div>
+            <div><dt>Fecha del informe</dt><dd>${formatearFecha(new Date().toISOString())}</dd></div>
+          </dl>
+
+          ${data.introduccion.map((p) => `<p>${esc(p)}</p>`).join('')}
+
+          <h2>Instrumentos aplicados</h2>
+          ${data.instrumentos.map((i, idx) => `
+            <p class="informe-instrumento">
+              <strong>${idx + 1}. ${esc(i.titulo)}</strong>
+              <span class="muted">Área explorada:</span> ${esc(i.area)}<br />
+              <span class="muted">Objetivo:</span> ${esc(i.objetivo)}
+            </p>
+          `).join('')}
+
+          <h2 style="margin-top:32px">Resultados</h2>
+          ${data.resultados.map(bloqueResultado).join('')}
+
+          <div class="informe-firma">
+            <div class="linea"></div>
+            <p style="margin:0"><strong>${esc(data.firma.nombre)}</strong></p>
+            <p class="muted" style="margin:0">${esc(data.firma.cargo)}</p>
+            <p class="muted" style="margin:0">${esc(data.firma.titulo)}</p>
+            <p class="muted" style="margin:0">${esc(data.firma.tarjeta_profesional)}</p>
+          </div>
+        `;
+      } catch (err) {
+        doc.innerHTML = `<div class="error">${esc(formatError(err))}</div>`;
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

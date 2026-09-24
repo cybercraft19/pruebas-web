@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/estudiantes', [EstudianteController::class, 'store']);
         Route::get('/estudiantes/exportar', [EstudianteController::class, 'exportar']);
         Route::get('/estudiantes/{estudiante}', [EstudianteController::class, 'show']);
+        Route::get('/estudiantes/{estudiante}/informe', [EstudianteController::class, 'informe']);
         Route::put('/estudiantes/{estudiante}', [EstudianteController::class, 'update']);
         Route::delete('/estudiantes/{estudiante}', [EstudianteController::class, 'destroy']);
         Route::post('/estudiantes/{estudiante}/reset-password', [EstudianteController::class, 'resetPassword']);
@@ -41,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:estudiante')->group(function () {
         Route::get('/mis-intentos', [IntentoController::class, 'mios']);
+        Route::get('/mi-informe', [IntentoController::class, 'miInforme']);
         Route::post('/intentos', [IntentoController::class, 'store']);
         Route::post('/intentos/{intento}/respuestas', [IntentoController::class, 'responder']);
         Route::post('/intentos/{intento}/tmt/iniciar', [IntentoController::class, 'iniciarTmt']);
