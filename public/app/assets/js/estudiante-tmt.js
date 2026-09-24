@@ -206,9 +206,9 @@
         ctx.fillText(nodo.etiqueta, x, y);
       });
 
-      // "Inicio" y "Fin" sobre el primer y el último nodo de la secuencia,
-      // igual que en la hoja oficial del Trail Making Test.
-      if (nodos.length > 0) {
+      // "Inicio" y "Final" sobre el primer y el último nodo, solo en la ronda de
+      // práctica (así se ve en la hoja oficial: la ronda real no los repite).
+      if (!timed && nodos.length > 0) {
         ctx.fillStyle = '#1e293b';
         ctx.font = 'italic 600 12px Inter, sans-serif';
         ctx.textAlign = 'center';
@@ -216,8 +216,8 @@
         const inicio = coords(nodos[0]);
         ctx.fillText('Inicio', inicio.x, inicio.y - RADIO - 6);
         if (nodos.length > 1) {
-          const fin = coords(nodos[nodos.length - 1]);
-          ctx.fillText('Fin', fin.x, fin.y - RADIO - 6);
+          const final = coords(nodos[nodos.length - 1]);
+          ctx.fillText('Final', final.x, final.y - RADIO - 6);
         }
       }
 

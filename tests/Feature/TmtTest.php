@@ -22,13 +22,13 @@ class TmtTest extends TestCase
 
         $nodos = $prueba->tmtNodos()->get();
         $this->assertCount(8, $nodos->where('parte', 'A')->where('practica', true));
-        $this->assertCount(25, $nodos->where('parte', 'A')->where('practica', false));
+        $this->assertCount(15, $nodos->where('parte', 'A')->where('practica', false));
         $this->assertCount(8, $nodos->where('parte', 'B')->where('practica', true));
-        $this->assertCount(25, $nodos->where('parte', 'B')->where('practica', false));
+        $this->assertCount(15, $nodos->where('parte', 'B')->where('practica', false));
 
         $etiquetasParteB = $nodos->where('parte', 'B')->where('practica', false)->sortBy('orden')->pluck('etiqueta')->values();
         $this->assertEquals(['1', 'A', '2', 'B', '3'], $etiquetasParteB->take(5)->all());
-        $this->assertEquals('13', $etiquetasParteB->last());
+        $this->assertEquals('8', $etiquetasParteB->last());
     }
 
     public function test_el_layout_es_siempre_el_mismo_entre_distintas_pruebas(): void
@@ -117,7 +117,7 @@ class TmtTest extends TestCase
     {
         [$estudiante, $intentoId] = $this->intentoTmtConNodos();
 
-        // 25 círculos en 2 segundos no lo hace un humano, aunque hayan pasado 60 s.
+        // 15 círculos en 2 segundos no lo hace un humano, aunque hayan pasado 60 s.
         $this->registrarTmt($estudiante, $intentoId, 'A', segundosReales: 60, tiempoInformado: 2)->assertUnprocessable();
         $this->assertDatabaseCount('tmt_resultados', 0);
     }
