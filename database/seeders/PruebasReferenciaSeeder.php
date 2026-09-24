@@ -35,7 +35,7 @@ class PruebasReferenciaSeeder extends Seeder
         $this->call(PruebasHemaRejillaSeeder::class);
     }
 
-    private function crearTmt(User $evaluador): void
+    public function crearTmt(User $evaluador): void
     {
         $prueba = Prueba::create([
             'creado_por' => $evaluador->id,
@@ -48,7 +48,7 @@ class PruebasReferenciaSeeder extends Seeder
         app(TmtLayoutService::class)->generar($prueba);
     }
 
-    private function crearCuestionarioAnsiedad(User $evaluador): void
+    public function crearCuestionarioAnsiedad(User $evaluador): void
     {
         $prueba = Prueba::create([
             'creado_por' => $evaluador->id,
@@ -75,15 +75,15 @@ class PruebasReferenciaSeeder extends Seeder
 
             InterpretacionCategoria::create([
                 'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 1, 'valor_max' => 3, 'etiqueta' => 'Bajo',
-                'recomendacion' => 'Tu nivel de ansiedad ante los exámenes está dentro de un rango saludable. Mantené tus hábitos de estudio y descanso.',
+                'recomendacion' => 'Su nivel de ansiedad ante los exámenes está dentro de un rango saludable. Mantenga sus hábitos de estudio y descanso.',
             ]);
             InterpretacionCategoria::create([
                 'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 3.01, 'valor_max' => 4, 'etiqueta' => 'Medio',
-                'recomendacion' => 'Notás algo de ansiedad ante los exámenes. Organizar el estudio con anticipación y practicar técnicas de respiración puede ayudarte.',
+                'recomendacion' => 'Nota algo de ansiedad ante los exámenes. Organizar el estudio con anticipación y practicar técnicas de respiración puede ayudarle.',
             ]);
             InterpretacionCategoria::create([
                 'categoria_evaluacion_id' => $categoria->id, 'valor_min' => 4.01, 'valor_max' => 5, 'etiqueta' => 'Alto',
-                'recomendacion' => 'Tu nivel de ansiedad es alto. Te recomendamos hablar con un orientador o psicólogo escolar, y practicar técnicas de relajación antes de rendir.',
+                'recomendacion' => 'Su nivel de ansiedad es alto. Se recomienda hablar con un orientador o psicólogo escolar, y practicar técnicas de relajación antes de rendir.',
             ]);
 
             $categorias[$nombre] = $categoria;
@@ -131,7 +131,7 @@ class PruebasReferenciaSeeder extends Seeder
         }
     }
 
-    private function crearInteligenciasMultiples(User $evaluador): void
+    public function crearInteligenciasMultiples(User $evaluador): void
     {
         $prueba = Prueba::create([
             'creado_por' => $evaluador->id,
@@ -232,7 +232,7 @@ class PruebasReferenciaSeeder extends Seeder
         }
     }
 
-    private function crearProcrastinacionAcademica(User $evaluador): void
+    public function crearProcrastinacionAcademica(User $evaluador): void
     {
         $prueba = Prueba::create([
             'creado_por' => $evaluador->id,
