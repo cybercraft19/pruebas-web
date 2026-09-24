@@ -95,91 +95,28 @@ class PruebasHemaRejillaSeeder extends Seeder
     }
 
     /**
-     * El PDF del HEMA no trae rangos de interpretación: son una propuesta del sistema, por
-     * proporción del puntaje máximo de cada sección (hasta 50 % "Por mejorar", de ahí hasta
-     * menos de 80 % "Aceptable", 80 % o más "Fortaleza"). Solo se cargan en las secciones que
-     * todavía no tienen ninguna, así el seeder también sirve para una prueba ya existente.
+     * Bandas reales del ejemplo de informe oficial (docs/Ejemplo informe con todas las
+     * pruebas de 6 a 11.docx): por sección, "Alto" de 7 a 10 puntos y "Bajo" de 0 a 6
+     * (el texto narrativo del informe es un párrafo único, no uno por sección — se arma
+     * en el servicio de informe, no acá). Solo se cargan en las secciones que todavía no
+     * tienen ninguna, así el seeder también sirve para una prueba ya existente.
      */
     private function sembrarInterpretacionesHema(Prueba $hema): void
     {
-        $recomendaciones = $this->recomendacionesHema();
-
         foreach ($hema->categorias()->withCount('preguntas')->get() as $categoria) {
             if ($categoria->interpretaciones()->exists()) {
                 continue;
             }
 
-            $maximo = $categoria->preguntas_count;
-            $topePorMejorar = (int) floor($maximo * 0.5);
-            $inicioFortaleza = (int) ceil($maximo * 0.8);
-
-            $bandas = [
-                ['Por mejorar', 0, $topePorMejorar],
-                ['Aceptable', $topePorMejorar + 1, $inicioFortaleza - 1],
-                ['Fortaleza', $inicioFortaleza, $maximo],
-            ];
-
-            foreach ($bandas as $indice => [$etiqueta, $minimo, $tope]) {
-                InterpretacionCategoria::create([
-                    'categoria_evaluacion_id' => $categoria->id,
-                    'valor_min' => $minimo,
-                    'valor_max' => $tope,
-                    'etiqueta' => $etiqueta,
-                    'recomendacion' => $recomendaciones[$categoria->orden][$indice],
-                ]);
-            }
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id,
+                'valor_min' => 0, 'valor_max' => 6, 'etiqueta' => 'Bajo',
+            ]);
+            InterpretacionCategoria::create([
+                'categoria_evaluacion_id' => $categoria->id,
+                'valor_min' => 7, 'valor_max' => $categoria->preguntas_count, 'etiqueta' => 'Alto',
+            ]);
         }
-    }
-
-    /**
-     * Por orden de sección: [Por mejorar, Aceptable, Fortaleza].
-     *
-     * @return array<int, array<int, string>>
-     */
-    private function recomendacionesHema(): array
-    {
-        return [
-            1 => [
-                'Tu lugar de estudio necesita ajustes. Busca un espacio fijo, silencioso, bien iluminado y ventilado, con una mesa amplia y una silla con respaldo. Revisa las preguntas que respondiste con No.',
-                'Tu ambiente de estudio es aceptable. Mejora los detalles que respondiste con No (ruido, luz, mesa o silla) para concentrarte mejor.',
-                'Tienes un ambiente de estudio muy adecuado. Mantenlo así.',
-            ],
-            2 => [
-                'Tu descanso, tu alimentación o tu manejo emocional pueden estar afectando tu estudio. Duerme cerca de ocho horas, cambia de actividad cuando te canses y busca apoyo si la frustración o la tensión te sobrepasan.',
-                'Cuidas parte de tu salud para estudiar, pero hay aspectos por reforzar. Revisa los que respondiste con No: sueño, alimentación o manejo de la frustración.',
-                'Cuidas bien tu salud física y emocional, y eso favorece tu estudio.',
-            ],
-            3 => [
-                'Te conviene mejorar tu método de estudio. Empieza con una lectura general, destaca lo principal, haz esquemas y resúmenes, y lleva tus apuntes al día.',
-                'Tu método de estudio está en desarrollo. Refuerza las técnicas que respondiste con No, como los esquemas, los resúmenes o destacar lo importante.',
-                'Tu método de estudio es sólido. Sigue usando esquemas, resúmenes y repasos.',
-            ],
-            4 => [
-                'Necesitas organizar mejor tu tiempo. Define un horario de estudio habitual, reparte el trabajo a lo largo de la semana, fija prioridades y haz descansos cortos.',
-                'Te organizas de manera aceptable. Revisa las respuestas con No para ajustar tu horario, tus prioridades y tus descansos.',
-                'Organizas muy bien tu tiempo de estudio. Conserva tus horarios y tus descansos.',
-            ],
-            5 => [
-                'Prepara mejor cómo enfrentas los exámenes: lee las instrucciones con calma, reparte el tiempo entre las preguntas, empieza por las más sencillas y relee antes de entregar.',
-                'Tienes una buena base para los exámenes. Refuerza lo que respondiste con No, como distribuir el tiempo, hacer un esquema previo o releer.',
-                'Afrontas los exámenes con buenas estrategias. Sigue cuidando la letra, la ortografía y la revisión final.',
-            ],
-            6 => [
-                'Te falta práctica para buscar información. Aprende a usar bibliotecas, fichas y sistemas bibliográficos, y ubica fuentes confiables para tus temas de estudio.',
-                'Buscas información de forma parcial. Refuerza las herramientas que respondiste con No, como fichas, bibliotecas o sistemas informatizados.',
-                'Buscas información con soltura. Sigue ampliando tus fuentes.',
-            ],
-            7 => [
-                'Conviene fortalecer cómo redactas y te expresas. Practica la redacción de trabajos, argumenta tus ideas y trabaja en equipo.',
-                'Te comunicas de forma aceptable. Trabaja lo que respondiste con No, por ejemplo argumentar, discutir trabajos o usar otros idiomas.',
-                'Te comunicas con claridad, por escrito y de forma oral. Sigue practicando.',
-            ],
-            8 => [
-                'Tu motivación para aprender está baja. Conecta lo que estudias con tus metas, reflexiona sobre cómo aprendes y busca apoyo si sientes que no avanzas.',
-                'Tu motivación es aceptable. Revisa las respuestas con No: reflexionar sobre cómo aprendes, buscar más información y aprovechar mejor tu tiempo.',
-                'Estás muy motivado para aprender. Aprovecha esa energía para seguir explorando tus intereses.',
-            ],
-        ];
     }
 
     /**

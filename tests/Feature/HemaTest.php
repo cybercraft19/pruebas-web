@@ -56,16 +56,16 @@ class HemaTest extends TestCase
         $this->assertSame(200, Prueba::where('tipo', 'rejilla')->firstOrFail()->rejillaCeldas()->count());
     }
 
-    public function test_cada_seccion_tiene_tres_rangos_que_cubren_todo_el_puntaje_sin_huecos(): void
+    public function test_cada_seccion_tiene_dos_rangos_que_cubren_todo_el_puntaje_sin_huecos(): void
     {
         [, $hema] = $this->sembrar();
 
         foreach ($hema->categorias()->withCount('preguntas')->get() as $categoria) {
             $bandas = $categoria->interpretaciones()->get();
 
-            $this->assertSame(['Por mejorar', 'Aceptable', 'Fortaleza'], $bandas->pluck('etiqueta')->all());
+            $this->assertSame(['Bajo', 'Alto'], $bandas->pluck('etiqueta')->all());
             $this->assertSame(0.0, (float) $bandas[0]->valor_min);
-            $this->assertSame((float) $categoria->preguntas_count, (float) $bandas[2]->valor_max);
+            $this->assertSame((float) $categoria->preguntas_count, (float) $bandas[1]->valor_max);
 
             // Cada puntaje entero posible cae en exactamente una banda.
             for ($puntaje = 0; $puntaje <= $categoria->preguntas_count; $puntaje++) {
@@ -83,16 +83,16 @@ class HemaTest extends TestCase
         $this->seed(PruebasHemaRejillaSeeder::class);
 
         $this->assertSame(1, Prueba::where('titulo', self::TITULO)->count());
-        $this->assertSame(24, InterpretacionCategoria::whereIn('categoria_evaluacion_id', $hema->categorias()->pluck('id'))->count());
+        $this->assertSame(16, InterpretacionCategoria::whereIn('categoria_evaluacion_id', $hema->categorias()->pluck('id'))->count());
     }
 
-    public function test_el_resultado_del_estudiante_trae_la_etiqueta_y_la_recomendacion(): void
+    public function test_el_resultado_del_estudiante_trae_la_etiqueta(): void
     {
         [, $hema] = $this->sembrar();
         $estudiante = User::factory()->create(['role' => 'estudiante']);
         $intentoId = $this->actingAs($estudiante)->postJson('/api/intentos', ['prueba_id' => $hema->id])->json('id');
 
-        // Todo "No": cada sección queda en 0 = "Por mejorar".
+        // Todo "No": cada sección queda en 0 = "Bajo".
         foreach ($hema->preguntas()->with('opciones')->get() as $pregunta) {
             $this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/respuestas", [
                 'pregunta_id' => $pregunta->id,
@@ -103,8 +103,7 @@ class HemaTest extends TestCase
         $resultados = collect($this->actingAs($estudiante)->postJson("/api/intentos/{$intentoId}/finalizar")->json('resultados'));
 
         $this->assertCount(8, $resultados);
-        $this->assertSame(['Por mejorar'], $resultados->pluck('etiqueta_interpretacion')->unique()->values()->all());
-        $this->assertNotEmpty($resultados->first()['recomendacion']);
+        $this->assertSame(['Bajo'], $resultados->pluck('etiqueta_interpretacion')->unique()->values()->all());
     }
 
     public function test_el_puntaje_de_cada_seccion_es_la_cantidad_de_si(): void
