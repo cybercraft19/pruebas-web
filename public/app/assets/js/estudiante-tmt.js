@@ -126,6 +126,7 @@
     let punteroPos = null;
     let nodoError = null;
     let errorTimeout = null;
+    let ultimoNodoTocado = null;
     let rafHandle = null;
 
     stage.innerHTML = `
@@ -311,13 +312,17 @@
         return Math.hypot(x - nx, y - ny) <= RADIO;
       });
 
-      if (nodoTocado) {
+      // Mientras se arrastra, pointermove dispara docenas de veces por segundo: sin este
+      // control, pasar una sola vez por un nodo equivocado sumaba un error por cada evento
+      // de movimiento en vez de uno solo por el toque.
+      if (nodoTocado && nodoTocado !== ultimoNodoTocado) {
         errores += 1;
         erroresEl.textContent = `Errores: ${errores}`;
         nodoError = nodoTocado;
         clearTimeout(errorTimeout);
         errorTimeout = setTimeout(() => { nodoError = null; }, 260);
       }
+      ultimoNodoTocado = nodoTocado || null;
     }
 
     canvas.addEventListener('pointerdown', (e) => {
@@ -326,6 +331,7 @@
       const { x, y } = posDesdeEvento(e);
       arrastrando = true;
       punteroPos = { x, y };
+      ultimoNodoTocado = null;
       intentarAvanzar(x, y);
     });
 
